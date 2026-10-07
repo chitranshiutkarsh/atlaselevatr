@@ -3,9 +3,11 @@
 The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 
 - **Atlas map**: World → continent → country. Each layer shows the unicorns, the problems they solved, problems people raised there, and every startup in that place by category.
-- **Startup directory** (`/startups`): 3,800+ Indian startups including all 131 Indian unicorns, plus global unicorns. Filter by category, city and search. Founders can list their startup at `/startups/add` (reviewed in `/admin`).
+- **Startup directory** (`/startups`): ~9,700 startups: 4,000 Indian (including all 131 Indian unicorns) and 5,700 from other countries (Y Combinator companies and 1,000+ global unicorns). Filter by category, city and search. Founders can list their startup at `/startups/add` (reviewed in `/admin`).
 - **Add a problem**: no login or sign-up. Problem, industry, country and how you'd solve it, with spam protection built in.
-- **Leaderboard**: problems ranked by votes (one vote per person per problem), with filters and an industry breakdown.
+- **Leaderboard**: problems ranked by votes (one vote per person per problem), with filters and an industry breakdown. Starts with 50+ problems from public sources (Razorpay Fix My Itch, WHO, UN SDGs, World Bank, UNICEF, UNEP).
+- **Problem pages** (`/problems/ID`): anyone can suggest a solution or comment, and mark suggestions as helpful.
+- **Status** (`/status`): shows whether each one-time data load has finished.
 - **Jobs**: up to 50 curated problem-solving roles. Each Apply button opens the original LinkedIn / IIM Jobs posting.
 - **Invite codes**: anyone gets a personal share link (`/r/CODE`). Visits, people who join and problems they add are credited to the inviter.
 - **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns.
@@ -39,4 +41,6 @@ npm run dev
 - IP addresses are never stored, only a salted hash used for rate limiting.
 - The starter unicorn list (`lib/seed.js`) is a starting point. Check and edit it in `/admin`.
 - Indian startups (`lib/data/india-startups.json`) are built by `scripts/build_india_startups.py` from public Indian startup funding datasets (2015–2021): the Kaggle "Indian Startup Funding" set and the 2018–2021 funding set, via the GitHub repos named in the script. They are imported once on first run. Edit or add startups in `/admin`.
+- Global startups (`lib/data/global-startups.json`) are built by `scripts/build_global_startups.py` from the open Y Combinator directory mirror (github.com/yc-oss/api) and Maven Analytics' public-domain unicorn list.
+- Data loads run once, in batches, and resume if interrupted. Check `/status` after a deploy.
 - Brand name in the footer comes from `NEXT_PUBLIC_PARENT_BRAND` (default "Elevtr Ventures").

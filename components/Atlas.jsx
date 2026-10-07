@@ -214,7 +214,7 @@ export default function Atlas({ unicorns, countryCounts }) {
                     <li key={p.id} className="flex gap-3 rounded-lg border border-ink/10 bg-white p-3">
                       <VoteButton id={p.id} votes={p.votes} compact />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold">{p.title}</p>
+                        <Link href={`/problems/${p.id}`} className="text-sm font-semibold hover:text-signal">{p.title}</Link>
                         <p className="mt-0.5 font-mono text-[10px] uppercase text-ink2">
                           {p.industry} · {prettyName(p.country)}
                         </p>

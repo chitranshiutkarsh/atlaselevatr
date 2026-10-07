@@ -6,6 +6,7 @@ import { INDUSTRIES } from '@/lib/constants';
 import { CONTINENTS, prettyName } from '@/lib/geo';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 export const metadata = { title: 'Leaderboard' };
 
 function href(current, change) {
@@ -84,19 +85,29 @@ export default async function ProblemsPage({ searchParams }) {
                   </span>
                   <VoteButton id={p.id} votes={p.votes} />
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-semibold leading-snug">{p.title}</h2>
+                    <h2 className="text-lg font-semibold leading-snug">
+                      <Link href={`/problems/${p.id}`} className="hover:text-signal">{p.title}</Link>
+                    </h2>
                     <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink2">
                       {p.industry} · {prettyName(p.country)} · {timeAgo(p.created_at)}
                       {p.author ? ` · by ${p.author}` : ''}
                     </p>
                     {p.details && <p className="mt-2 text-sm text-ink2">{p.details}</p>}
-                    <details className="group mt-2">
-                      <summary className="cursor-pointer list-none text-sm font-semibold text-signal">
-                        <span className="group-open:hidden">How they would solve it →</span>
-                        <span className="hidden group-open:inline">Hide solution</span>
-                      </summary>
-                      <p className="mt-2 rounded-lg bg-paper2/70 p-3 text-sm">{p.solution}</p>
-                    </details>
+<div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                      <Link href={`/problems/${p.id}`} className="font-semibold text-signal hover:underline">
+                        {p.comments > 0 ? `💡 ${p.comments} suggestion${p.comments === 1 ? '' : 's'} →` : '💡 Suggest a solution →'}
+                      </Link>
+                      {p.source && (
+                        <span className="font-mono text-[11px] text-ink2">
+                          Source:{' '}
+                          {p.source_url ? (
+                            <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">{p.source}</a>
+                          ) : (
+                            p.source
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </li>
               ))}

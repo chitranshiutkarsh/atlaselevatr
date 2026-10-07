@@ -35,7 +35,7 @@ export default function ProblemForm({ defaultCountry }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      setStatus({ state: 'done', message: '' });
+      setStatus({ state: 'done', message: String(data.id || '') });
     } catch (err) {
       setStatus({ state: 'error', message: err.message });
     }
@@ -48,7 +48,7 @@ export default function ProblemForm({ defaultCountry }) {
         <h2 className="mt-2 font-display text-3xl font-semibold">Your problem is on the map.</h2>
         <p className="mt-2 text-ink2">Get people to vote for it. Share your invite link so the votes count toward you.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/problems?sort=new" className="btn-primary">See it on the leaderboard</Link>
+          <Link href={status.message ? `/problems/${status.message}` : '/problems?sort=new'} className="btn-primary">See your problem</Link>
           <Link href="/invite" className="btn-ghost">Get my invite link</Link>
           <button
             className="btn-ghost"

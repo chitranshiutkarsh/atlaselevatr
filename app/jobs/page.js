@@ -3,6 +3,7 @@ import { listJobs } from '@/lib/queries';
 import { MAX_ACTIVE_JOBS } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 export const metadata = { title: 'Problem-solving jobs' };
 
 const SEARCHES = [

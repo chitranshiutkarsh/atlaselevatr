@@ -4,6 +4,7 @@ import SetupNotice from '@/components/SetupNotice';
 import { getAtlasData, getStats } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export default async function Home() {
   let data;

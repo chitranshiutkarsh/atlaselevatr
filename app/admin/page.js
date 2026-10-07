@@ -6,6 +6,7 @@ import { listJobs } from '@/lib/queries';
 import { isAdmin, adminConfigured } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 export const metadata = { title: 'Admin', robots: { index: false, follow: false } };
 
 export default async function AdminPage() {
@@ -24,16 +25,17 @@ export default async function AdminPage() {
 
   try {
     const sql = await db();
-    const [problems, jobs, companies, [{ n: companyTotal }], submissions] = await Promise.all([
+    const [problems, jobs, companies, [{ n: companyTotal }], submissions, comments] = await Promise.all([
       sql`SELECT id, title, industry, country, votes, status, author FROM problems ORDER BY created_at DESC LIMIT 300`,
       listJobs({ includeInactive: true }),
       sql`SELECT id, name, country, industry, problem, website, city, sector, is_unicorn FROM companies WHERE is_unicorn ORDER BY continent, name`,
       sql`SELECT count(*)::int AS n FROM companies`,
       sql`SELECT id, name, country, industry, sector, city, problem, website, founded, submitter, contact FROM company_submissions WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200`,
+      sql`SELECT c.id, c.kind, c.body, c.author, c.status, c.helpful, p.id AS problem_id, p.title AS problem FROM problem_comments c JOIN problems p ON p.id = c.problem_id ORDER BY c.created_at DESC LIMIT 150`,
     ]);
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
-    return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} submissions={submissions} />;
+    return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} submissions={submissions} comments={comments} />;
   } catch (err) {
     console.error(err);
     return <SetupNotice error={err.message} />;

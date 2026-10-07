@@ -19,7 +19,7 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [] }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [] }) {
   const router = useRouter();
   const [tab, setTab] = useState(submissions.length ? 'submissions' : 'jobs');
   const [job, setJob] = useState(EMPTY_JOB);
@@ -57,6 +57,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
     ['submissions', `Startup submissions (${submissions.length})`],
     ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
+    ['comments', `Comments (${comments.length})`],
     ['companies', `Startups (${companyTotal.toLocaleString('en-IN')})`],
   ];
 
@@ -160,6 +161,39 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
                 </button>
                 <button className="chip hover:border-signal hover:text-signal" disabled={busy} onClick={() => run(() => call(`/api/admin/submissions/${sub.id}`, 'PATCH', { action: 'reject' }))}>
                   Reject
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tab === 'comments' && (
+        <ul className="mt-6 space-y-2">
+          {comments.length === 0 && <li className="text-ink2">No comments yet.</li>}
+          {comments.map((c) => (
+            <li key={c.id} className={`card flex flex-wrap items-start justify-between gap-3 p-4 ${c.status === 'live' ? '' : 'opacity-50'}`}>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-xs text-ink2">
+                  {c.kind} · {c.author || 'anonymous'} · 👍 {c.helpful} · on{' '}
+                  <a href={`/problems/${c.problem_id}`} target="_blank" rel="noopener noreferrer" className="underline">{c.problem}</a>
+                </p>
+                <p className="mt-1 whitespace-pre-line text-sm">{c.body}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="chip"
+                  disabled={busy}
+                  onClick={() => run(() => call(`/api/admin/comments/${c.id}`, 'PATCH', { status: c.status === 'live' ? 'hidden' : 'live' }))}
+                >
+                  {c.status === 'live' ? 'Hide' : 'Show'}
+                </button>
+                <button
+                  className="chip hover:border-signal hover:text-signal"
+                  disabled={busy}
+                  onClick={() => confirm('Delete this comment?') && run(() => call(`/api/admin/comments/${c.id}`, 'DELETE'))}
+                >
+                  Delete
                 </button>
               </div>
             </li>
