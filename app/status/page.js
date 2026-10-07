@@ -16,6 +16,9 @@ export default async function StatusPage() {
   return (
     <div className="mx-auto max-w-xl pt-12">
       <h1 className="font-display text-3xl font-semibold">System status</h1>
+      <p className="mt-1 font-mono text-xs text-ink2">
+        build {(process.env.VERCEL_GIT_COMMIT_SHA || 'local').slice(0, 7)} · rendered {new Date().toISOString()}
+      </p>
       {error ? (
         <p className="mt-4 rounded-lg bg-signal/10 p-4 font-mono text-sm text-signal">Database error: {error}</p>
       ) : (
