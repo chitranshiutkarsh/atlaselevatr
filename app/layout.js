@@ -27,6 +27,9 @@ export const metadata = {
 
 export const viewport = { themeColor: '#F4F1EA' };
 
+// Every page reads live data; never serve cached database responses.
+export const fetchCache = 'force-no-store';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
