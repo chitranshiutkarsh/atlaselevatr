@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import VoteButton from '@/components/VoteButton';
 import Comments from '@/components/Comments';
+import BuildInterest from '@/components/BuildInterest';
 import SetupNotice from '@/components/SetupNotice';
 import { getProblem, listComments } from '@/lib/queries';
 import { prettyName } from '@/lib/geo';
@@ -70,6 +71,8 @@ export default async function ProblemPage({ params }) {
           <p className="mt-2">{problem.solution}</p>
         </div>
       )}
+
+      <BuildInterest problemId={problem.id} problemTitle={problem.title} initialCount={problem.builders || 0} />
 
       <Comments problemId={problem.id} initial={plainComments} />
     </div>

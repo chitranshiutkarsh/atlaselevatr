@@ -92,7 +92,7 @@ export default function LiveLeaderboard({ initial, sort, query }) {
         const latest = new Map(problems.map((p) => [p.id, p]));
         reorder((prev) => {
           const known = new Set(prev.map((p) => p.id));
-          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments } : p));
+          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments, builders: latest.get(p.id).builders } : p));
           const added = problems.filter((p) => !known.has(p.id));
           return [...updated, ...added];
         });
@@ -148,6 +148,9 @@ export default function LiveLeaderboard({ initial, sort, query }) {
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                   <Link href={`/problems/${p.id}`} className="font-semibold text-signal hover:underline">
                     {p.comments > 0 ? `💡 ${p.comments} suggestion${p.comments === 1 ? '' : 's'} →` : '💡 Suggest a solution →'}
+                  </Link>
+                  <Link href={`/problems/${p.id}#build`} className="font-semibold text-ink hover:text-signal">
+                    🚀 {p.builders > 0 ? `${p.builders} want${p.builders === 1 ? 's' : ''} to build this` : 'Want to build this?'}
                   </Link>
                   {p.source && (
                     <span className="font-mono text-[11px] text-ink2">

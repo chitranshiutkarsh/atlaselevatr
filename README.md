@@ -7,6 +7,7 @@ The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 - **Add a problem**: no login or sign-up. Problem, industry, country and how you'd solve it, with spam protection built in.
 - **Leaderboard**: problems ranked by votes (one vote per person per problem), with filters and an industry breakdown. Starts with 50+ problems from public sources (Razorpay Fix My Itch, WHO, UN SDGs, World Bank, UNICEF, UNEP).
 - **Problem pages** (`/problems/ID`): anyone can suggest a solution or comment, and mark suggestions as helpful.
+- **Want to build this?**: on every problem, would-be founders leave their details, stage, commitment and what help they need. Leads land in `/admin` → Builders, with status tracking, notes and CSV export.
 - **Status** (`/status`): shows whether each one-time data load has finished.
 - **Jobs**: up to 50 curated problem-solving roles. Each Apply button opens the original LinkedIn / IIM Jobs posting.
 - **Invite codes**: anyone gets a personal share link (`/r/CODE`). Visits, people who join and problems they add are credited to the inviter.

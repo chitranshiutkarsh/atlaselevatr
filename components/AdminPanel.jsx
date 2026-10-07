@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS } from '@/lib/constants';
+import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS, LEAD_STATUSES, BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
 
 async function call(url, method, body) {
@@ -19,9 +19,12 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [] }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [] }) {
   const router = useRouter();
-  const [tab, setTab] = useState(submissions.length ? 'submissions' : 'jobs');
+  const newLeads = leads.filter((l) => l.status === 'new').length;
+  const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
+  const [leadFilter, setLeadFilter] = useState('all');
+  const [noteDraft, setNoteDraft] = useState({});
   const [job, setJob] = useState(EMPTY_JOB);
   const [co, setCo] = useState(EMPTY_CO);
   const [msg, setMsg] = useState('');
@@ -54,6 +57,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
   }
 
   const tabs = [
+    ['leads', `🚀 Builders (${newLeads} new / ${leads.length})`],
     ['submissions', `Startup submissions (${submissions.length})`],
     ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
@@ -130,6 +134,84 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
                 </div>
               </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {tab === 'leads' && (
+        <section className="mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-1.5">
+              {['all', ...LEAD_STATUSES].map((st) => (
+                <button key={st} onClick={() => setLeadFilter(st)} className={leadFilter === st ? 'chip-on' : 'chip'}>
+                  {st} ({st === 'all' ? leads.length : leads.filter((l) => l.status === st).length})
+                </button>
+              ))}
+            </div>
+            <a href="/api/admin/builders/export" className="btn-ghost">Download CSV</a>
+          </div>
+          <ul className="mt-4 space-y-3">
+            {leads.length === 0 && <li className="text-ink2">No builders yet. They appear here when someone taps “Want to build this?” on a problem.</li>}
+            {leads
+              .filter((l) => leadFilter === 'all' || l.status === leadFilter)
+              .map((l) => (
+                <li key={l.id} className={`card p-4 ${l.status === 'new' ? 'ring-2 ring-signal/30' : ''}`}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">
+                        {l.name} <span className="font-mono text-xs font-normal text-ink2">· {new Date(l.created_at).toLocaleDateString('en-IN')}{l.city ? ` · ${l.city}` : ''}</span>
+                      </p>
+                      <p className="mt-0.5 font-mono text-xs">
+                        <a href={`mailto:${l.email}`} className="underline">{l.email}</a>
+                        {l.phone && <> · <a href={`https://wa.me/${l.phone.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="underline">{l.phone}</a></>}
+                        {l.linkedin && <> · <a href={l.linkedin} target="_blank" rel="noopener noreferrer" className="underline">LinkedIn</a></>}
+                      </p>
+                      <p className="mt-1 text-sm">
+                        wants to build{' '}
+                        <a href={`/problems/${l.problem_id}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{l.problem}</a>
+                        <span className="text-ink2"> ({l.votes} votes)</span>
+                      </p>
+                      <p className="mt-1 font-mono text-[11px] uppercase text-ink2">
+                        {(BUILDER_STAGES.find(([k]) => k === l.stage) || [, l.stage])[1]} · {(BUILDER_COMMITMENT.find(([k]) => k === l.commitment) || [, l.commitment])[1]}
+                        {l.needs ? ` · needs: ${l.needs.split(',').map((n) => (BUILDER_NEEDS.find(([k]) => k === n) || [, n])[1]).join(', ')}` : ''}
+                      </p>
+                      {l.pitch && <p className="mt-2 whitespace-pre-line rounded-lg bg-paper2/60 p-3 text-sm">{l.pitch}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="input w-auto py-1.5 text-sm"
+                        value={l.status}
+                        disabled={busy}
+                        onChange={(e) => run(() => call(`/api/admin/builders/${l.id}`, 'PATCH', { status: e.target.value }))}
+                      >
+                        {LEAD_STATUSES.map((st) => <option key={st} value={st}>{st}</option>)}
+                      </select>
+                      <button
+                        className="chip hover:border-signal hover:text-signal"
+                        disabled={busy}
+                        onClick={() => confirm(`Delete ${l.name}'s entry?`) && run(() => call(`/api/admin/builders/${l.id}`, 'DELETE'))}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      className="input py-1.5 text-sm"
+                      placeholder="Private notes (call scheduled, intro sent…)"
+                      value={noteDraft[l.id] ?? l.notes ?? ''}
+                      onChange={(e) => setNoteDraft((d) => ({ ...d, [l.id]: e.target.value }))}
+                    />
+                    <button
+                      className="chip shrink-0"
+                      disabled={busy || noteDraft[l.id] === undefined}
+                      onClick={() => run(() => call(`/api/admin/builders/${l.id}`, 'PATCH', { notes: noteDraft[l.id] }), 'Note saved')}
+                    >
+                      Save note
+                    </button>
+                  </div>
+                </li>
+              ))}
           </ul>
         </section>
       )}
