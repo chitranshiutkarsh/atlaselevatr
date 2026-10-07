@@ -17,7 +17,7 @@ export async function GET(request) {
       continent: CONTINENTS.some((c) => c.name === continent) ? continent : null,
       country: country && CONTINENT_OF[country] ? country : null,
       industry: INDUSTRIES.includes(industry) ? industry : null,
-      sort: p.get('sort') === 'new' ? 'new' : 'top',
+      sort: ['new', 'merit', 'discover'].includes(p.get('sort')) ? p.get('sort') : 'top',
       limit: p.get('limit') || 20,
       offset: p.get('offset') || 0,
     });

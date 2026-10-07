@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS, LEAD_STATUSES, BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
+import CsvImport from './CsvImport';
 
 async function call(url, method, body) {
   const res = await fetch(url, {
@@ -317,6 +318,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
 
       {tab === 'companies' && (
         <section className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
+          <div className="h-fit space-y-4">
           <form
             className="card h-fit space-y-3 p-5"
             onSubmit={(e) => {
@@ -346,6 +348,8 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
             <button className="btn-primary w-full" disabled={busy}>Save</button>
             <p className="text-xs text-ink2">Same name as an existing one updates it.</p>
           </form>
+            <CsvImport onDone={(m) => { setMsg(m); router.refresh(); }} />
+          </div>
           <div>
           <form onSubmit={searchCompanies} className="mb-3 flex gap-2">
             <input className="input" placeholder="Search all startups by name…" value={coSearch} onChange={(e) => setCoSearch(e.target.value)} />

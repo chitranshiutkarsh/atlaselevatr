@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import LiveLeaderboard from '@/components/LiveLeaderboard';
 import SetupNotice from '@/components/SetupNotice';
-import { listProblems, getStats } from '@/lib/queries';
+import { listProblems, getStats, MERIT_FORMULA } from '@/lib/queries';
 import { INDUSTRIES } from '@/lib/constants';
 import { CONTINENTS, prettyName } from '@/lib/geo';
 
@@ -27,8 +27,8 @@ function timeAgo(date) {
 export default async function ProblemsPage({ searchParams }) {
   const industry = INDUSTRIES.includes(searchParams.industry) ? searchParams.industry : null;
   const continent = CONTINENTS.some((c) => c.name === searchParams.continent) ? searchParams.continent : null;
-  const sort = searchParams.sort === 'new' ? 'new' : 'top';
-  const current = { industry, continent, sort: sort === 'new' ? 'new' : null };
+  const sort = ['new', 'merit', 'discover'].includes(searchParams.sort) ? searchParams.sort : 'top';
+  const current = { industry, continent, sort: sort === 'top' ? null : sort };
 
   let problems;
   let stats;
@@ -52,6 +52,8 @@ export default async function ProblemsPage({ searchParams }) {
         <section>
           <div className="flex flex-wrap items-center gap-2">
             <Link href={href(current, { sort: null })} className={sort === 'top' ? 'chip-on' : 'chip'}>Top voted</Link>
+            <Link href={href(current, { sort: 'merit' })} className={sort === 'merit' ? 'chip-on' : 'chip'}>Atlas score</Link>
+            <Link href={href(current, { sort: 'discover' })} className={sort === 'discover' ? 'chip-on' : 'chip'}>🎲 Discover</Link>
             <Link href={href(current, { sort: 'new' })} className={sort === 'new' ? 'chip-on' : 'chip'}>Newest</Link>
             <span className="mx-1 h-5 w-px bg-ink/15" />
             <Link href={href(current, { continent: null })} className={!continent ? 'chip-on' : 'chip'}>All regions</Link>
@@ -78,13 +80,15 @@ export default async function ProblemsPage({ searchParams }) {
             </div>
           ) : (
             <LiveLeaderboard
+              key={problems.map((p) => p.id).join(',')}
               initial={problems.map((p) => ({ ...p, created_at: new Date(p.created_at).toISOString() }))}
               sort={sort}
+              formula={MERIT_FORMULA}
               query={new URLSearchParams({
                 limit: '100',
                 ...(industry ? { industry } : {}),
                 ...(continent ? { continent } : {}),
-                ...(sort === 'new' ? { sort: 'new' } : {}),
+                ...(sort !== 'top' ? { sort } : {}),
               }).toString()}
             />
           )}

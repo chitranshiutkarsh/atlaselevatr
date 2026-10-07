@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import VoteButton from '@/components/VoteButton';
 import Comments from '@/components/Comments';
 import BuildInterest from '@/components/BuildInterest';
+import ViewTracker from '@/components/ViewTracker';
 import SetupNotice from '@/components/SetupNotice';
 import { getProblem, listComments } from '@/lib/queries';
 import { prettyName } from '@/lib/geo';
@@ -38,6 +39,7 @@ export default async function ProblemPage({ params }) {
 
   return (
     <div className="mx-auto max-w-3xl pt-10">
+      <ViewTracker id={problem.id} />
       <Link href="/problems" className="label hover:text-ink">← Leaderboard</Link>
       <div className="mt-4 flex gap-4">
         <VoteButton id={problem.id} votes={problem.votes} />
@@ -46,6 +48,7 @@ export default async function ProblemPage({ params }) {
           <p className="mt-2 font-mono text-[11px] uppercase tracking-wide text-ink2">
             {problem.industry} · {prettyName(problem.country)}
             {problem.author ? ` · raised by ${problem.author}` : ''}
+            {` · 👁 ${(problem.views || 0).toLocaleString('en-IN')} views`}
           </p>
         </div>
       </div>
