@@ -174,7 +174,10 @@ export default function StartupDirectory({
       </ul>
 
       {!loading && data.companies.length === 0 && !error && (
-        <p className="mt-3 text-sm text-ink2">No startups match. Try another category or clear the search.</p>
+        <p className="mt-3 text-sm text-ink2">
+          No startups match. Try another category, or{' '}
+          <a href="/startups/add" className="font-semibold text-signal hover:underline">list a startup that&apos;s missing</a>.
+        </p>
       )}
 
       {data.companies.length < data.total && (

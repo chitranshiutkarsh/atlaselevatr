@@ -36,6 +36,7 @@ export default function StartupsPage({ searchParams }) {
       <p className="mt-3 max-w-2xl text-ink2">
         Every startup, sorted into categories, with what it does and where it&apos;s based. Unicorns are listed first.
       </p>
+      <Link href="/startups/add" className="btn-primary mt-5">+ List your startup</Link>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {tabs.map((t) => (
@@ -50,8 +51,8 @@ export default function StartupsPage({ searchParams }) {
       </div>
 
       <p className="mt-4 text-xs text-ink2">
-        Indian startups are compiled from public startup funding records (2015–2021). Spot something wrong or missing?
-        Tell us and we&apos;ll fix it.
+        Indian startups are compiled from public startup funding records (2015–2021) plus India&apos;s unicorn list.
+        Missing or wrong? <Link href="/startups/add" className="underline hover:text-ink">List or correct a startup</Link>.
       </p>
     </div>
   );

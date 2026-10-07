@@ -19,9 +19,9 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [] }) {
   const router = useRouter();
-  const [tab, setTab] = useState('jobs');
+  const [tab, setTab] = useState(submissions.length ? 'submissions' : 'jobs');
   const [job, setJob] = useState(EMPTY_JOB);
   const [co, setCo] = useState(EMPTY_CO);
   const [msg, setMsg] = useState('');
@@ -54,6 +54,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal }) 
   }
 
   const tabs = [
+    ['submissions', `Startup submissions (${submissions.length})`],
     ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
     ['companies', `Startups (${companyTotal.toLocaleString('en-IN')})`],
@@ -130,6 +131,40 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal }) 
             ))}
           </ul>
         </section>
+      )}
+
+      {tab === 'submissions' && (
+        <ul className="mt-6 space-y-2">
+          {submissions.length === 0 && <li className="text-ink2">No startups waiting for review.</li>}
+          {submissions.map((sub) => (
+            <li key={sub.id} className="card flex flex-wrap items-start justify-between gap-3 p-4">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  {sub.name}{' '}
+                  <span className="font-mono text-xs font-normal text-ink2">
+                    · {[sub.city, prettyName(sub.country), sub.industry, sub.sector, sub.founded].filter(Boolean).join(' · ')}
+                  </span>
+                </p>
+                <p className="mt-1 text-sm">{sub.problem}</p>
+                <p className="mt-1 font-mono text-xs text-ink2">
+                  {sub.website && (
+                    <a href={sub.website} target="_blank" rel="noopener noreferrer" className="hover:text-signal">{sub.website}</a>
+                  )}
+                  {sub.submitter ? ` · by ${sub.submitter}` : ''}
+                  {sub.contact ? ` · ${sub.contact}` : ''}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button className="chip-on" disabled={busy} onClick={() => run(() => call(`/api/admin/submissions/${sub.id}`, 'PATCH', { action: 'approve' }), `${sub.name} is live`)}>
+                  Approve
+                </button>
+                <button className="chip hover:border-signal hover:text-signal" disabled={busy} onClick={() => run(() => call(`/api/admin/submissions/${sub.id}`, 'PATCH', { action: 'reject' }))}>
+                  Reject
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
 
       {tab === 'problems' && (

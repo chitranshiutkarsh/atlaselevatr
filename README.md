@@ -3,7 +3,7 @@
 The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 
 - **Atlas map**: World → continent → country. Each layer shows the unicorns, the problems they solved, problems people raised there, and every startup in that place by category.
-- **Startup directory** (`/startups`): 3,800+ Indian startups plus global unicorns, filterable by category, city and search. Unicorns are flagged and listed first.
+- **Startup directory** (`/startups`): 3,800+ Indian startups including all 131 Indian unicorns, plus global unicorns. Filter by category, city and search. Founders can list their startup at `/startups/add` (reviewed in `/admin`).
 - **Add a problem**: no login or sign-up. Problem, industry, country and how you'd solve it, with spam protection built in.
 - **Leaderboard**: problems ranked by votes (one vote per person per problem), with filters and an industry breakdown.
 - **Jobs**: up to 50 curated problem-solving roles. Each Apply button opens the original LinkedIn / IIM Jobs posting.

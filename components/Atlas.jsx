@@ -181,7 +181,7 @@ export default function Atlas({ unicorns, countryCounts }) {
                 <p className="mt-2 text-sm text-ink2">No unicorns listed here yet.</p>
               ) : (
                 <ul className="mt-2 space-y-2">
-                  {scopedUnicorns.slice(0, 40).map((c) => (
+                  {scopedUnicorns.slice(0, 200).map((c) => (
                     <li key={c.id} className="rounded-lg border border-ink/10 bg-white p-3">
                       <div className="flex items-baseline justify-between gap-2">
                         <p className="font-semibold">{c.name}</p>
