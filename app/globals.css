@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f4f1ea;
+  color: #14213d;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Faint graticule behind the page, like an old survey map. */
+.graticule {
+  background-image:
+    linear-gradient(rgba(20, 33, 61, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 33, 61, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@layer components {
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.14em] text-ink2;
+  }
+  .card {
+    @apply rounded-xl border border-ink/10 bg-white/70 backdrop-blur-sm;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-paper hover:bg-signal;
+  }
+  .btn-ghost {
+    @apply btn border border-ink/20 text-ink hover:border-ink;
+  }
+  .input {
+    @apply w-full rounded-lg border border-ink/15 bg-white px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-ink2/50 focus:border-ink focus:ring-2 focus:ring-signal/20;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-ink/15 px-3 py-1 text-xs font-medium text-ink2 transition hover:border-ink hover:text-ink;
+  }
+  .chip-on {
+    @apply chip border-ink bg-ink text-paper hover:text-paper;
+  }
+}
