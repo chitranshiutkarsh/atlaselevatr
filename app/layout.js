@@ -29,6 +29,7 @@ export const viewport = { themeColor: '#F4F1EA' };
 
 // Every page reads live data; never serve cached database responses.
 export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export default function RootLayout({ children }) {
   return (
