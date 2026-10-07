@@ -7,6 +7,7 @@ import { SITE } from '@/lib/constants';
 
 const LINKS = [
   { href: '/', label: 'Atlas' },
+  { href: '/startups', label: 'Startups' },
   { href: '/problems', label: 'Leaderboard' },
   { href: '/jobs', label: 'Jobs' },
   { href: '/invite', label: 'Invite' },

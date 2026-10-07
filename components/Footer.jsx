@@ -11,6 +11,7 @@ export default function Footer() {
           <p className="label mt-4">An {SITE.parent} initiative · {SITE.domain}</p>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink2">
+          <Link href="/startups" className="hover:text-ink">Startups</Link>
           <Link href="/problems" className="hover:text-ink">Leaderboard</Link>
           <Link href="/submit" className="hover:text-ink">Add a problem</Link>
           <Link href="/jobs" className="hover:text-ink">Jobs</Link>

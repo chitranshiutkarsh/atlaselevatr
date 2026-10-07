@@ -17,9 +17,9 @@ async function call(url, method, body) {
 }
 
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
-const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '' };
+const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal }) {
   const router = useRouter();
   const [tab, setTab] = useState('jobs');
   const [job, setJob] = useState(EMPTY_JOB);
@@ -27,6 +27,17 @@ export default function AdminPanel({ problems, jobs, companies }) {
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const activeJobs = jobs.filter((j) => j.active).length;
+  const [coSearch, setCoSearch] = useState('');
+  const [coResults, setCoResults] = useState(null);
+
+  async function searchCompanies(e) {
+    e.preventDefault();
+    if (!coSearch.trim()) return setCoResults(null);
+    const r = await fetch(`/api/companies?q=${encodeURIComponent(coSearch.trim())}&limit=60&_=${Date.now()}`);
+    const d = await r.json().catch(() => ({ companies: [] }));
+    setCoResults(d.companies || []);
+  }
+  const shownCompanies = coResults || companies;
 
   async function run(fn, success) {
     setBusy(true);
@@ -45,7 +56,7 @@ export default function AdminPanel({ problems, jobs, companies }) {
   const tabs = [
     ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
-    ['companies', `Unicorns (${companies.length})`],
+    ['companies', `Startups (${companyTotal.toLocaleString('en-IN')})`],
   ];
 
   return (
@@ -165,7 +176,7 @@ export default function AdminPanel({ problems, jobs, companies }) {
               }, 'Saved');
             }}
           >
-            <p className="font-semibold">Add or update a unicorn</p>
+            <p className="font-semibold">Add or update a startup</p>
             <input className="input" placeholder="Company name *" value={co.name} onChange={(e) => setCo({ ...co, name: e.target.value })} required />
             <select className="input" value={co.country} onChange={(e) => setCo({ ...co, country: e.target.value })}>
               {COUNTRIES.map((c) => <option key={c} value={c}>{prettyName(c)}</option>)}
@@ -175,11 +186,23 @@ export default function AdminPanel({ problems, jobs, companies }) {
             </select>
             <textarea className="input" rows={3} placeholder="Problem it solves *" value={co.problem} onChange={(e) => setCo({ ...co, problem: e.target.value })} required />
             <input className="input" placeholder="Website (optional)" value={co.website} onChange={(e) => setCo({ ...co, website: e.target.value })} />
+            <input className="input" placeholder="City (optional)" value={co.city} onChange={(e) => setCo({ ...co, city: e.target.value })} />
+            <input className="input" placeholder="Sector, e.g. Lending (optional)" value={co.sector} onChange={(e) => setCo({ ...co, sector: e.target.value })} />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={co.is_unicorn} onChange={(e) => setCo({ ...co, is_unicorn: e.target.checked })} />
+              Unicorn ($1B+ valuation)
+            </label>
             <button className="btn-primary w-full" disabled={busy}>Save</button>
             <p className="text-xs text-ink2">Same name as an existing one updates it.</p>
           </form>
+          <div>
+          <form onSubmit={searchCompanies} className="mb-3 flex gap-2">
+            <input className="input" placeholder="Search all startups by name…" value={coSearch} onChange={(e) => setCoSearch(e.target.value)} />
+            <button className="btn-ghost shrink-0">Search</button>
+          </form>
+          <p className="label mb-2">{coResults ? `${coResults.length} results` : `Showing ${companies.length} unicorns. Search to find any startup.`}</p>
           <ul className="space-y-2">
-            {companies.map((c) => (
+            {shownCompanies.map((c) => (
               <li key={c.id} className="card flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="font-semibold">
@@ -191,7 +214,7 @@ export default function AdminPanel({ problems, jobs, companies }) {
                   <button
                     className="chip"
                     onClick={() => {
-                      setCo({ name: c.name, country: c.country, industry: c.industry, problem: c.problem, website: c.website || '' });
+                      setCo({ name: c.name, country: c.country, industry: c.industry, problem: c.problem, website: c.website || '', city: c.city || '', sector: c.sector || '', is_unicorn: Boolean(c.is_unicorn) });
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >
@@ -200,7 +223,13 @@ export default function AdminPanel({ problems, jobs, companies }) {
                   <button
                     className="chip hover:border-signal hover:text-signal"
                     disabled={busy}
-                    onClick={() => confirm(`Remove ${c.name}?`) && run(() => call(`/api/admin/companies/${c.id}`, 'DELETE'))}
+                    onClick={() =>
+                      confirm(`Remove ${c.name}?`) &&
+                      run(async () => {
+                        await call(`/api/admin/companies/${c.id}`, 'DELETE');
+                        setCoResults((r) => (r ? r.filter((x) => x.id !== c.id) : r));
+                      })
+                    }
                   >
                     Remove
                   </button>
@@ -208,6 +237,7 @@ export default function AdminPanel({ problems, jobs, companies }) {
               </li>
             ))}
           </ul>
+          </div>
         </section>
       )}
     </div>

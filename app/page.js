@@ -28,12 +28,13 @@ export default async function Home() {
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link href="/submit" className="btn-primary">+ Add a problem</Link>
+          <Link href="/startups" className="btn-ghost">Browse {stats.companies.toLocaleString('en-IN')} startups</Link>
           <Link href="/problems" className="btn-ghost">See the leaderboard</Link>
         </div>
 
         <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-ink/10 bg-ink/10 sm:grid-cols-4">
           {[
-            ['Unicorns mapped', stats.companies],
+            ['Startups mapped', stats.companies],
             ['Problems raised', stats.problems],
             ['Votes cast', stats.votes],
             ['Countries', stats.countries],
@@ -46,7 +47,7 @@ export default async function Home() {
         </dl>
       </section>
 
-      <Atlas companies={data.companies} countryCounts={data.countryCounts} />
+      <Atlas unicorns={data.unicorns} countryCounts={data.countryCounts} />
     </>
   );
 }

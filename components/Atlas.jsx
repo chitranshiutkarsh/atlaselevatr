@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { CONTINENTS, CONTINENT_OF, WORLD_VIEW, prettyName, continentByName } from '@/lib/geo';
+import StartupDirectory from './StartupDirectory';
 import VoteButton from './VoteButton';
 
 const WorldMap = dynamic(() => import('./WorldMap'), {
@@ -11,40 +12,43 @@ const WorldMap = dynamic(() => import('./WorldMap'), {
   loading: () => <div className="aspect-[2/1] w-full animate-pulse rounded-xl bg-paper2" />,
 });
 
-export default function Atlas({ companies, countryCounts }) {
+const fmt = (n) => (n || 0).toLocaleString('en-IN');
+
+export default function Atlas({ unicorns, countryCounts }) {
   const [continent, setContinent] = useState(null);
   const [country, setCountry] = useState(null);
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Map weight per country = unicorns there + community problems there.
-  const { weights, maxWeight, byContinent, byCountry } = useMemo(() => {
+  // Map shading = startups + community problems in each country.
+  const { weights, maxWeight, continentTotals, unicornsByContinent, unicornsByCountry } = useMemo(() => {
     const weights = {};
-    const byContinent = {};
-    const byCountry = {};
-    for (const c of companies) {
-      weights[c.country] = (weights[c.country] || 0) + 1;
-      (byContinent[c.continent] ||= []).push(c);
-      (byCountry[c.country] ||= []).push(c);
-    }
+    const continentTotals = {};
     for (const [name, v] of Object.entries(countryCounts)) {
-      weights[name] = (weights[name] || 0) + v.problems;
-    }
-    const maxWeight = Math.max(1, ...Object.values(weights));
-    return { weights, maxWeight, byContinent, byCountry };
-  }, [companies, countryCounts]);
-
-  const problemsInContinent = useMemo(() => {
-    const totals = {};
-    for (const [name, v] of Object.entries(countryCounts)) {
+      weights[name] = (v.companies || 0) + (v.problems || 0);
       const cont = CONTINENT_OF[name];
-      if (cont) totals[cont] = (totals[cont] || 0) + v.problems;
+      if (!cont) continue;
+      const t = (continentTotals[cont] ||= { companies: 0, problems: 0 });
+      t.companies += v.companies || 0;
+      t.problems += v.problems || 0;
     }
-    return totals;
-  }, [countryCounts]);
+    const unicornsByContinent = {};
+    const unicornsByCountry = {};
+    for (const u of unicorns) {
+      (unicornsByContinent[u.continent] ||= []).push(u);
+      (unicornsByCountry[u.country] ||= []).push(u);
+    }
+    return {
+      weights,
+      maxWeight: Math.max(1, ...Object.values(weights)),
+      continentTotals,
+      unicornsByContinent,
+      unicornsByCountry,
+    };
+  }, [unicorns, countryCounts]);
 
   useEffect(() => {
-    const params = new URLSearchParams({ limit: '8' });
+    const params = new URLSearchParams({ limit: '6' });
     if (country) params.set('country', country);
     else if (continent) params.set('continent', continent);
     let cancelled = false;
@@ -59,50 +63,44 @@ export default function Atlas({ companies, countryCounts }) {
     };
   }, [continent, country]);
 
-  const view = country || continent ? continentByName(continent) : null;
+  const view = continent ? continentByName(continent) : null;
   const center = view ? view.center : WORLD_VIEW.center;
   const zoom = view ? view.zoom : WORLD_VIEW.zoom;
 
-  function pickCountry(name, cont) {
+  const pickCountry = (name, cont) => {
     setContinent(cont);
     setCountry(name);
-  }
-  function pickContinent(name) {
+  };
+  const pickContinent = (name) => {
     setContinent(name);
     setCountry(null);
-  }
-  function reset() {
+  };
+  const reset = () => {
     setContinent(null);
     setCountry(null);
-  }
+  };
 
   const layer = country ? 'country' : continent ? 'continent' : 'world';
-  const scopedCompanies = country ? byCountry[country] || [] : continent ? byContinent[continent] || [] : [];
+  const scopedUnicorns = country ? unicornsByCountry[country] || [] : continent ? unicornsByContinent[continent] || [] : [];
   const countriesInContinent = continent
-    ? Array.from(
-        new Set([
-          ...(byContinent[continent] || []).map((c) => c.country),
-          ...Object.keys(countryCounts).filter((n) => CONTINENT_OF[n] === continent),
-        ])
-      ).sort((a, b) => prettyName(a).localeCompare(prettyName(b)))
+    ? Object.entries(countryCounts)
+        .filter(([n]) => CONTINENT_OF[n] === continent)
+        .sort((a, b) => (b[1].companies + b[1].problems) - (a[1].companies + a[1].problems))
     : [];
+  const scopeCount = country ? countryCounts[country]?.companies || 0 : continentTotals[continent]?.companies || 0;
 
   return (
     <section className="mt-6">
-      {/* Breadcrumb + continent chips */}
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={reset} className={layer === 'world' ? 'chip-on' : 'chip'}>
-          World
-        </button>
+        <button onClick={reset} className={layer === 'world' ? 'chip-on' : 'chip'}>World</button>
         {CONTINENTS.map((c) => (
-          <button
-            key={c.slug}
-            onClick={() => pickContinent(c.name)}
-            className={continent === c.name && !country ? 'chip-on' : 'chip'}
-          >
+          <button key={c.slug} onClick={() => pickContinent(c.name)} className={continent === c.name && !country ? 'chip-on' : 'chip'}>
             {c.name}
           </button>
         ))}
+        <button onClick={() => pickCountry('India', 'Asia')} className={country === 'India' ? 'chip-on' : 'chip'}>
+          🇮🇳 India
+        </button>
       </div>
 
       <div className="mt-4 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
@@ -124,37 +122,33 @@ export default function Atlas({ companies, countryCounts }) {
             zoom={zoom}
             onPick={pickCountry}
           />
-          <div className="flex items-center gap-3 px-2 pt-2 text-xs text-ink2">
+          <div className="flex flex-wrap items-center gap-3 px-2 pt-2 text-xs text-ink2">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#E3DDCF]" /> No data yet
-            <span className="inline-block h-2.5 w-8 rounded-sm bg-gradient-to-r from-[#C4BAA5] to-signal" /> More unicorns
-            &amp; problems
+            <span className="inline-block h-2.5 w-8 rounded-sm bg-gradient-to-r from-[#C4BAA5] to-signal" /> More startups &amp; problems
           </div>
         </div>
 
-        {/* Side panel changes with the layer */}
         <aside className="card flex max-h-[640px] flex-col overflow-hidden">
-          {layer === 'world' && (
+          {layer === 'world' ? (
             <div className="overflow-y-auto p-5">
               <h2 className="font-display text-2xl font-semibold">Pick a continent</h2>
-              <p className="mt-1 text-sm text-ink2">See its top unicorns and the problems they solved.</p>
+              <p className="mt-1 text-sm text-ink2">See its unicorns, every startup by category, and the problems people raised.</p>
               <ul className="mt-4 divide-y divide-ink/10">
                 {CONTINENTS.map((c) => {
-                  const list = byContinent[c.name] || [];
+                  const list = unicornsByContinent[c.name] || [];
+                  const t = continentTotals[c.name] || {};
                   return (
                     <li key={c.slug}>
-                      <button
-                        onClick={() => pickContinent(c.name)}
-                        className="group flex w-full items-start justify-between gap-3 py-3 text-left"
-                      >
-                        <div>
+                      <button onClick={() => pickContinent(c.name)} className="group flex w-full items-start justify-between gap-3 py-3 text-left">
+                        <div className="min-w-0">
                           <p className="font-semibold group-hover:text-signal">{c.name}</p>
                           <p className="mt-0.5 line-clamp-1 text-xs text-ink2">
-                            {list.slice(0, 3).map((x) => x.name).join(' · ') || 'No unicorns added yet'}
+                            {list.slice(0, 4).map((x) => x.name).join(' · ') || 'No unicorns added yet'}
                           </p>
                         </div>
                         <div className="shrink-0 text-right font-mono text-xs text-ink2">
-                          <div>{list.length} unicorns</div>
-                          <div>{problemsInContinent[c.name] || 0} problems</div>
+                          <div>{fmt(t.companies)} startups</div>
+                          <div>{fmt(t.problems)} problems</div>
                         </div>
                       </button>
                     </li>
@@ -162,51 +156,40 @@ export default function Atlas({ companies, countryCounts }) {
                 })}
               </ul>
             </div>
-          )}
-
-          {layer !== 'world' && (
+          ) : (
             <div className="overflow-y-auto p-5">
               <button onClick={layer === 'country' ? () => pickContinent(continent) : reset} className="label hover:text-ink">
                 ← {layer === 'country' ? continent : 'World'}
               </button>
-              <h2 className="mt-2 font-display text-2xl font-semibold">
-                {layer === 'country' ? prettyName(country) : continent}
-              </h2>
+              <h2 className="mt-2 font-display text-2xl font-semibold">{layer === 'country' ? prettyName(country) : continent}</h2>
+              <p className="mt-1 font-mono text-xs text-ink2">
+                {fmt(scopeCount)} startups · {fmt(scopedUnicorns.length)} unicorns
+              </p>
 
               {layer === 'continent' && countriesInContinent.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {countriesInContinent.map((n) => (
+                  {countriesInContinent.map(([n, v]) => (
                     <button key={n} onClick={() => pickCountry(n, continent)} className="chip">
-                      {prettyName(n)}
+                      {prettyName(n)} <span className="ml-1 font-mono opacity-70">{fmt(v.companies)}</span>
                     </button>
                   ))}
                 </div>
               )}
 
-              <p className="label mt-5">
-                {layer === 'country' ? 'Companies & the problem they solve' : 'Top unicorns & what they solve'}
-              </p>
-              {scopedCompanies.length === 0 ? (
+              <p className="label mt-5">Unicorns &amp; the problem they solve</p>
+              {scopedUnicorns.length === 0 ? (
                 <p className="mt-2 text-sm text-ink2">No unicorns listed here yet.</p>
               ) : (
                 <ul className="mt-2 space-y-2">
-                  {scopedCompanies.map((c) => (
+                  {scopedUnicorns.slice(0, 40).map((c) => (
                     <li key={c.id} className="rounded-lg border border-ink/10 bg-white p-3">
                       <div className="flex items-baseline justify-between gap-2">
-                        <p className="font-semibold">
-                          {c.website ? (
-                            <a href={c.website} target="_blank" rel="noopener noreferrer" className="hover:text-signal">
-                              {c.name}
-                            </a>
-                          ) : (
-                            c.name
-                          )}
-                        </p>
+                        <p className="font-semibold">{c.name}</p>
                         <span className="shrink-0 font-mono text-[10px] uppercase text-ink2">
-                          {layer === 'continent' ? prettyName(c.country) : c.industry}
+                          {layer === 'continent' ? prettyName(c.country) : c.city || c.industry}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm text-ink2">{c.problem}</p>
+                      <p className="mt-1 line-clamp-2 text-sm text-ink2">{c.problem}</p>
                     </li>
                   ))}
                 </ul>
@@ -244,6 +227,27 @@ export default function Atlas({ companies, countryCounts }) {
           )}
         </aside>
       </div>
+
+      {/* Bottom layer: every startup in scope, by category */}
+      {layer !== 'world' && (
+        <div className="card mt-6 p-4 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="label">All startups</p>
+              <h3 className="font-display text-2xl font-semibold">
+                {fmt(scopeCount)} startups in {layer === 'country' ? prettyName(country) : continent}, by category
+              </h3>
+            </div>
+            <Link
+              href={country ? `/startups?country=${encodeURIComponent(country)}` : `/startups?continent=${encodeURIComponent(continent)}`}
+              className="text-sm font-semibold text-signal hover:underline"
+            >
+              Open full directory →
+            </Link>
+          </div>
+          <StartupDirectory country={country} continent={country ? null : continent} />
+        </div>
+      )}
     </section>
   );
 }

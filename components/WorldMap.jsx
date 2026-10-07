@@ -8,7 +8,8 @@ const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
 function fillFor(weight, max) {
   if (!weight) return '#E3DDCF';
-  const t = Math.min(1, Math.sqrt(weight / Math.max(max, 1)));
+  // Log scale so one very busy country (India) doesn't wash out the rest.
+  const t = Math.min(1, Math.log1p(weight) / Math.log1p(Math.max(max, 1)));
   // Blend from light ink to signal orange as activity rises.
   const from = [196, 186, 165];
   const to = [228, 87, 46];

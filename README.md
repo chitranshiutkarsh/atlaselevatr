@@ -2,7 +2,8 @@
 
 The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 
-- **Atlas map**: World → continent → country. Each layer shows the top unicorns, the problems they solved, and problems people have raised there.
+- **Atlas map**: World → continent → country. Each layer shows the unicorns, the problems they solved, problems people raised there, and every startup in that place by category.
+- **Startup directory** (`/startups`): 3,800+ Indian startups plus global unicorns, filterable by category, city and search. Unicorns are flagged and listed first.
 - **Add a problem**: no login or sign-up. Problem, industry, country and how you'd solve it, with spam protection built in.
 - **Leaderboard**: problems ranked by votes (one vote per person per problem), with filters and an industry breakdown.
 - **Jobs**: up to 50 curated problem-solving roles. Each Apply button opens the original LinkedIn / IIM Jobs posting.
@@ -37,4 +38,5 @@ npm run dev
 - Jobs are curated by hand in `/admin` because LinkedIn does not allow scraping. The board holds 50 live jobs at most.
 - IP addresses are never stored, only a salted hash used for rate limiting.
 - The starter unicorn list (`lib/seed.js`) is a starting point. Check and edit it in `/admin`.
+- Indian startups (`lib/data/india-startups.json`) are built by `scripts/build_india_startups.py` from public Indian startup funding datasets (2015–2021): the Kaggle "Indian Startup Funding" set and the 2018–2021 funding set, via the GitHub repos named in the script. They are imported once on first run. Edit or add startups in `/admin`.
 - Brand name in the footer comes from `NEXT_PUBLIC_PARENT_BRAND` (default "Elevtr Ventures").

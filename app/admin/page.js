@@ -24,14 +24,15 @@ export default async function AdminPage() {
 
   try {
     const sql = await db();
-    const [problems, jobs, companies] = await Promise.all([
+    const [problems, jobs, companies, [{ n: companyTotal }]] = await Promise.all([
       sql`SELECT id, title, industry, country, votes, status, author FROM problems ORDER BY created_at DESC LIMIT 300`,
       listJobs({ includeInactive: true }),
-      sql`SELECT id, name, country, industry, problem, website FROM companies ORDER BY continent, name`,
+      sql`SELECT id, name, country, industry, problem, website, city, sector, is_unicorn FROM companies WHERE is_unicorn ORDER BY continent, name`,
+      sql`SELECT count(*)::int AS n FROM companies`,
     ]);
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
-    return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} />;
+    return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} />;
   } catch (err) {
     console.error(err);
     return <SetupNotice error={err.message} />;
