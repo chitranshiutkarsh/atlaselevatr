@@ -20,7 +20,7 @@ function remember(id) {
   } catch {}
 }
 
-export default function VoteButton({ id, votes: initial, compact = false }) {
+export default function VoteButton({ id, votes: initial, compact = false, onVoted }) {
   const [votes, setVotes] = useState(initial);
   const [voted, setVoted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -29,20 +29,29 @@ export default function VoteButton({ id, votes: initial, compact = false }) {
     setVoted(readVoted().has(id));
   }, [id]);
 
+  // Follow vote counts pushed in from live updates.
+  useEffect(() => {
+    if (!busy) setVotes(initial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initial]);
+
   async function vote() {
     if (voted || busy) return;
     setBusy(true);
     setVoted(true);
     setVotes((v) => v + 1);
+    onVoted?.(id, votes + 1);
     try {
       const res = await fetch(`/api/problems/${id}/vote`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setVotes(data.votes);
+      onVoted?.(id, data.votes);
       remember(id);
     } catch {
       setVoted(false);
       setVotes((v) => v - 1);
+      onVoted?.(id, votes);
     } finally {
       setBusy(false);
     }

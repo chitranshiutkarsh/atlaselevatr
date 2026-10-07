@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import VoteButton from '@/components/VoteButton';
+import LiveLeaderboard from '@/components/LiveLeaderboard';
 import SetupNotice from '@/components/SetupNotice';
 import { listProblems, getStats } from '@/lib/queries';
 import { INDUSTRIES } from '@/lib/constants';
@@ -77,41 +77,16 @@ export default async function ProblemsPage({ searchParams }) {
               <Link href="/submit" className="btn-primary mt-5">+ Add a problem</Link>
             </div>
           ) : (
-            <ol className="mt-6 space-y-3">
-              {problems.map((p, i) => (
-                <li key={p.id} className="card flex gap-4 p-4">
-                  <span className="w-7 shrink-0 pt-1 text-right font-mono text-sm text-ink2">
-                    {sort === 'top' ? `#${i + 1}` : ''}
-                  </span>
-                  <VoteButton id={p.id} votes={p.votes} />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-semibold leading-snug">
-                      <Link href={`/problems/${p.id}`} className="hover:text-signal">{p.title}</Link>
-                    </h2>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink2">
-                      {p.industry} · {prettyName(p.country)} · {timeAgo(p.created_at)}
-                      {p.author ? ` · by ${p.author}` : ''}
-                    </p>
-                    {p.details && <p className="mt-2 text-sm text-ink2">{p.details}</p>}
-<div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                      <Link href={`/problems/${p.id}`} className="font-semibold text-signal hover:underline">
-                        {p.comments > 0 ? `💡 ${p.comments} suggestion${p.comments === 1 ? '' : 's'} →` : '💡 Suggest a solution →'}
-                      </Link>
-                      {p.source && (
-                        <span className="font-mono text-[11px] text-ink2">
-                          Source:{' '}
-                          {p.source_url ? (
-                            <a href={p.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">{p.source}</a>
-                          ) : (
-                            p.source
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <LiveLeaderboard
+              initial={problems.map((p) => ({ ...p, created_at: new Date(p.created_at).toISOString() }))}
+              sort={sort}
+              query={new URLSearchParams({
+                limit: '100',
+                ...(industry ? { industry } : {}),
+                ...(continent ? { continent } : {}),
+                ...(sort === 'new' ? { sort: 'new' } : {}),
+              }).toString()}
+            />
           )}
         </section>
 

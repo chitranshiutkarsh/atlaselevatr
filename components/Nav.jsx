@@ -11,6 +11,7 @@ const LINKS = [
   { href: '/problems', label: 'Leaderboard' },
   { href: '/jobs', label: 'Jobs' },
   { href: '/invite', label: 'Invite' },
+  { href: '/about', label: 'About' },
 ];
 
 export default function Nav() {
@@ -26,7 +27,7 @@ export default function Nav() {
           <span className="label hidden sm:inline">by {SITE.parent}</span>
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           {LINKS.map((l) => (
             <Link
               key={l.href}
@@ -44,7 +45,7 @@ export default function Nav() {
         </div>
 
         <button
-          className="rounded-lg border border-ink/15 px-3 py-2 text-sm md:hidden"
+          className="rounded-lg border border-ink/15 px-3 py-2 text-sm lg:hidden"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label="Menu"
@@ -54,7 +55,7 @@ export default function Nav() {
       </nav>
 
       {open && (
-        <div className="border-t border-ink/10 bg-paper px-4 pb-4 md:hidden">
+        <div className="border-t border-ink/10 bg-paper px-4 pb-4 lg:hidden">
           {LINKS.map((l) => (
             <Link
               key={l.href}

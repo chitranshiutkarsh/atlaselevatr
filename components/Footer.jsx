@@ -16,6 +16,7 @@ export default function Footer() {
           <Link href="/submit" className="hover:text-ink">Add a problem</Link>
           <Link href="/jobs" className="hover:text-ink">Jobs</Link>
           <Link href="/invite" className="hover:text-ink">Invite</Link>
+          <Link href="/about" className="hover:text-ink">About {SITE.parent}</Link>
         </div>
       </div>
     </footer>
