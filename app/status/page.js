@@ -42,6 +42,9 @@ export default async function StatusPage() {
               </li>
             ))}
           </ul>
+          <p className="mt-3 font-mono text-xs text-ink2">
+            schema v{status.schema || '?'} · {status.chunksDone} batches loaded
+          </p>
           {status.loading && <p className="mt-3 text-sm text-ink2">Data is loading right now. Refresh in a minute.</p>}
         </>
       )}
