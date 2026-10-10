@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import LiveLeaderboard from '@/components/LiveLeaderboard';
 import SetupNotice from '@/components/SetupNotice';
+import DigestSignup from '@/components/DigestSignup';
 import { listProblems, getStats, MERIT_FORMULA } from '@/lib/queries';
 import { INDUSTRIES } from '@/lib/constants';
 import { CONTINENTS, prettyName } from '@/lib/geo';
@@ -45,7 +46,8 @@ export default async function ProblemsPage({ searchParams }) {
       <p className="label">Dashboard</p>
       <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Problem leaderboard</h1>
       <p className="mt-3 max-w-2xl text-ink2">
-        Ranked by votes from everyone on Atlas. One vote per person per problem. No sign-up needed.
+        Ranked by votes from everyone on Atlas. One vote per person per problem. No sign-up needed. Tap “This happens to
+        me” to add first-hand proof: {stats.validated} problem{stats.validated === 1 ? ' is' : 's are'} validated so far.
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -99,6 +101,8 @@ export default async function ProblemsPage({ searchParams }) {
             {[
               ['Problems', stats.problems],
               ['Votes', stats.votes],
+              ['Face it', stats.proofs],
+              ['Validated', stats.validated],
               ['Countries', stats.countries],
               ['Members', stats.members],
             ].map(([label, value]) => (
@@ -130,6 +134,11 @@ export default async function ProblemsPage({ searchParams }) {
               </ul>
             )}
           </div>
+          <Link href="/gaps" className="card block p-5 hover:border-ink">
+            <p className="label">Gap finder</p>
+            <p className="mt-1 font-semibold">Problems no startup is building yet →</p>
+          </Link>
+          <DigestSignup compact />
           <Link href="/submit" className="btn-primary w-full">+ Add a problem</Link>
         </aside>
       </div>
