@@ -11,6 +11,12 @@ The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 - **Status** (`/status`): shows whether each one-time data load has finished.
 - **Jobs**: up to 50 curated problem-solving roles. Each Apply button opens the original LinkedIn / IIM Jobs posting.
 - **Invite codes**: anyone gets a personal share link (`/r/CODE`). Visits, people who join and problems they add are credited to the inviter.
+- **This happens to me** (proof): on every problem, people share a one-line story, how often it happens, whether they'd pay for a fix and who it hits. It also counts as their vote. A problem is **validated** at 10 stories + 1 builder claim (`VALIDATION` in `lib/constants.js`).
+- **Startup engine** (`lib/engine.js`): every problem is matched against the ~9,700 startups with Postgres full-text search (keywords from the problem, boosted for same industry, same country and unicorns). Problem pages show "Who's solving this" with a CTA to `/problems/ID/startups` (all matches, grouped by country). It runs automatically when a problem is added. Anyone can add a missing startup there: one already in the directory is linked at once; a new one is reviewed in `/admin` and then joins the main directory, linked to the problem.
+- **Gap finder** (`/gaps`): problems ranked by unmet demand: (votes + 2 × stories + 4 × builders) ÷ (1 + startups already working on it in that country). Labels: open whitespace, gap in country, thin, crowded.
+- **Claims and Builders board** (`/builders`): "Want to build this?" can be made public. Public builders get a card (first name, city, stage, needs, headline; never contact details), post progress updates from the same browser, and others ask for an intro (handled by the team in `/admin` → Intro requests). Setting a lead to "in studio" shows a studio-pick badge.
+- **Share cards**: each problem has a generated image (`opengraph-image.js`) and WhatsApp / LinkedIn / X / copy buttons. Links carry the sharer's invite code.
+- **Sign-in and weekly digest**: email magic links (no passwords) at `/signin`, a "My Atlas" page at `/me`, and a weekly email of top problems, new problems and gaps for a chosen country and industries, sent every Monday 9:00 IST by Vercel Cron (`vercel.json`). Needs `RESEND_API_KEY`, `EMAIL_FROM` and `CRON_SECRET`.
 - **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns.
 
 Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed on Vercel.
@@ -25,6 +31,9 @@ Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed o
    | `ADMIN_PASSWORD` | a strong password, 8+ characters (for `/admin`) |
    | `HASH_SECRET` | any long random text |
    | `NEXT_PUBLIC_SITE_URL` | `https://atlaselevatr.in` |
+   | `RESEND_API_KEY` | from [resend.com](https://resend.com) → API Keys (for sign-in links and the digest) |
+   | `EMAIL_FROM` | e.g. `Atlas <hello@atlaselevatr.in>` (verify the domain in Resend first) |
+   | `CRON_SECRET` | any long random text (protects the weekly digest job) |
 4. **Redeploy.** **Deployments → ⋯ on the latest → Redeploy.** Tables are created and the starter unicorn list is loaded automatically on the first visit.
 5. **Connect the domain.** **Settings → Domains → Add** `atlaselevatr.in` (and `www.atlaselevatr.in`). Vercel shows the DNS records to add at your domain registrar.
 
