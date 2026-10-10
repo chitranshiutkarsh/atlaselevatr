@@ -2,6 +2,7 @@ import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { SITE } from '@/lib/constants';
+import { getUserId } from '@/lib/auth';
 import './globals.css';
 
 const display = Fraunces({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
@@ -35,7 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body className="graticule min-h-screen">
-        <Nav />
+        <Nav signedIn={Boolean(getUserId())} />
         <main className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6">{children}</main>
         <Footer />
       </body>
