@@ -13,6 +13,8 @@ export default function Footer() {
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink2">
           <Link href="/startups" className="hover:text-ink">Startups</Link>
           <Link href="/problems" className="hover:text-ink">Leaderboard</Link>
+          <Link href="/gaps" className="hover:text-ink">Gap finder</Link>
+          <Link href="/builders" className="hover:text-ink">Builders</Link>
           <Link href="/submit" className="hover:text-ink">Add a problem</Link>
           <Link href="/jobs" className="hover:text-ink">Jobs</Link>
           <Link href="/invite" className="hover:text-ink">Invite</Link>

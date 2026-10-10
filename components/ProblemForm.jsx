@@ -35,7 +35,7 @@ export default function ProblemForm({ defaultCountry }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      setStatus({ state: 'done', message: String(data.id || '') });
+      setStatus({ state: 'done', message: String(data.id || ''), startups: data.startups || null });
     } catch (err) {
       setStatus({ state: 'error', message: err.message });
     }
@@ -47,8 +47,22 @@ export default function ProblemForm({ defaultCountry }) {
         <p className="label text-moss">Live now</p>
         <h2 className="mt-2 font-display text-3xl font-semibold">Your problem is on the map.</h2>
         <p className="mt-2 text-ink2">Get people to vote for it. Share your invite link so the votes count toward you.</p>
+        {status.startups && (
+          <p className="mt-4 rounded-lg bg-paper2/60 p-4 text-sm">
+            {status.startups.world === 0 ? (
+              <>The startup engine found <span className="font-semibold">no startup on Atlas working on this yet</span>. That&apos;s an open gap.</>
+            ) : (
+              <>
+                The startup engine found <span className="font-semibold">{status.startups.world} startup{status.startups.world === 1 ? '' : 's'}</span>{' '}
+                working on something like this ({status.startups.local} in your country)
+                {status.startups.top.length ? `, including ${status.startups.top.join(', ')}` : ''}.
+              </>
+            )}
+          </p>
+        )}
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href={status.message ? `/problems/${status.message}` : '/problems?sort=new'} className="btn-primary">See your problem</Link>
+          {status.message && <Link href={`/problems/${status.message}/startups`} className="btn-ghost">See who&apos;s solving it</Link>}
           <Link href="/invite" className="btn-ghost">Get my invite link</Link>
           <button
             className="btn-ghost"

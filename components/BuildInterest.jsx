@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS, SITE } from '@/lib/constants';
 
-const EMPTY = { name: '', email: '', phone: '', linkedin: '', city: '', stage: '', commitment: '', needs: [], pitch: '', hp: '' };
+const EMPTY = { name: '', email: '', phone: '', linkedin: '', city: '', stage: '', commitment: '', needs: [], pitch: '', headline: '', is_public: true, hp: '' };
 
 // "Want to build this?" call to action and form on a problem page.
 export default function BuildInterest({ problemId, problemTitle, initialCount }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [f, setF] = useState(EMPTY);
@@ -40,7 +42,8 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       setCount(data.builders);
-      setStatus({ state: 'done', message: '' });
+      setStatus({ state: 'done', message: '', isPublic: data.is_public });
+      if (data.is_public) router.refresh();
     } catch (err) {
       setStatus({ state: 'error', message: err.message });
     }
@@ -76,6 +79,12 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
           <p className="mt-2 text-sm text-ink2">
             We review every builder for “{problemTitle}”. Meanwhile, share this problem to rally votes and potential co-founders.
           </p>
+          {status.isPublic && (
+            <p className="mt-2 text-sm text-ink2">
+              Your builder card is live below. Post progress updates on it from this browser to show the studio and
+              possible co-founders you&apos;re moving.
+            </p>
+          )}
         </div>
       ) : (
         open && (
@@ -133,6 +142,33 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
                 maxLength={1500}
                 placeholder="Your background, unfair advantage, first idea for a solution…"
               />
+            </div>
+            <div className="rounded-lg border border-ink/10 bg-paper2/50 p-4">
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 accent-[#E4572E]"
+                  checked={f.is_public}
+                  onChange={(e) => setF((x) => ({ ...x, is_public: e.target.checked }))}
+                />
+                <span>
+                  <span className="font-semibold">Claim this problem publicly</span>
+                  <span className="block text-sm text-ink2">
+                    Show a builder card on this problem and on the Builders board: your first name, city, stage and what
+                    you need (e.g. a co-founder). Your email, phone and LinkedIn are never shown. People who want to join
+                    you ask the {SITE.parent} team for an intro.
+                  </span>
+                </span>
+              </label>
+              {f.is_public && (
+                <input
+                  className="input mt-3"
+                  value={f.headline}
+                  onChange={set('headline')}
+                  maxLength={140}
+                  placeholder="One-line headline for your card, e.g. “Ex-Swiggy PM building cold-chain lockers for kiranas”"
+                />
+              )}
             </div>
             <div>
               <label className="label" htmlFor="b-city">City</label>

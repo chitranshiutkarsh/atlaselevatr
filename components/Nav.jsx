@@ -7,14 +7,15 @@ import { SITE } from '@/lib/constants';
 
 const LINKS = [
   { href: '/', label: 'Atlas' },
-  { href: '/startups', label: 'Startups' },
   { href: '/problems', label: 'Leaderboard' },
+  { href: '/gaps', label: 'Gaps' },
+  { href: '/builders', label: 'Builders' },
+  { href: '/startups', label: 'Startups' },
   { href: '/jobs', label: 'Jobs' },
   { href: '/invite', label: 'Invite' },
-  { href: '/about', label: 'About' },
 ];
 
-export default function Nav() {
+export default function Nav({ signedIn = false }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const isOn = (href) => (href === '/' ? path === '/' : path.startsWith(href));
@@ -39,7 +40,15 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/submit" className="btn-primary ml-3">
+          <Link
+            href={signedIn ? '/me' : '/signin'}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              isOn('/me') || isOn('/signin') ? 'bg-ink text-paper' : 'text-ink2 hover:text-ink'
+            }`}
+          >
+            {signedIn ? 'My Atlas' : 'Sign in'}
+          </Link>
+          <Link href="/submit" className="btn-primary ml-2">
             + Add a problem
           </Link>
         </div>
@@ -66,6 +75,13 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            href={signedIn ? '/me' : '/signin'}
+            onClick={() => setOpen(false)}
+            className={`block border-b border-ink/5 py-3 text-base ${isOn('/me') || isOn('/signin') ? 'font-semibold' : 'text-ink2'}`}
+          >
+            {signedIn ? 'My Atlas' : 'Sign in'}
+          </Link>
           <Link href="/submit" onClick={() => setOpen(false)} className="btn-primary mt-4 w-full">
             + Add a problem
           </Link>

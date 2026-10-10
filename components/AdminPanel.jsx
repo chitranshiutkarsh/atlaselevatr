@@ -20,7 +20,7 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [] }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [] }) {
   const router = useRouter();
   const newLeads = leads.filter((l) => l.status === 'new').length;
   const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
@@ -59,7 +59,9 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
 
   const tabs = [
     ['leads', `🚀 Builders (${newLeads} new / ${leads.length})`],
+    ['intros', `🤝 Intro requests (${intros.filter((i) => i.status === 'new').length} new)`],
     ['submissions', `Startup submissions (${submissions.length})`],
+    ['proofs', `🙋 Stories (${proofs.length})`],
     ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
     ['comments', `Comments (${comments.length})`],
@@ -230,6 +232,11 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
                   </span>
                 </p>
                 <p className="mt-1 text-sm">{sub.problem}</p>
+                {sub.for_problem && (
+                  <p className="mt-1 text-xs text-moss">
+                    Suggested as solving: <a href={`/problems/${sub.problem_id}`} target="_blank" rel="noopener noreferrer" className="underline">{sub.for_problem}</a>
+                  </p>
+                )}
                 <p className="mt-1 font-mono text-xs text-ink2">
                   {sub.website && (
                     <a href={sub.website} target="_blank" rel="noopener noreferrer" className="hover:text-signal">{sub.website}</a>
@@ -246,6 +253,58 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
                   Reject
                 </button>
               </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tab === 'intros' && (
+        <ul className="mt-6 space-y-2">
+          {intros.length === 0 && <li className="text-ink2">No intro requests yet. They appear when someone asks to join a public builder.</li>}
+          {intros.map((i) => (
+            <li key={i.id} className={`card flex flex-wrap items-start justify-between gap-3 p-4 ${i.status === 'new' ? '' : 'opacity-60'}`}>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  {i.name} <span className="font-mono text-xs font-normal text-ink2">· <a href={`mailto:${i.email}`} className="underline">{i.email}</a></span>
+                </p>
+                <p className="mt-1 text-sm">
+                  wants an intro to <span className="font-semibold">{i.builder}</span> (<a href={`mailto:${i.builder_email}`} className="underline">{i.builder_email}</a>) on{' '}
+                  <a href={`/problems/${i.problem_id}#builders`} target="_blank" rel="noopener noreferrer" className="underline">{i.problem}</a>
+                </p>
+                {i.message && <p className="mt-1 whitespace-pre-line text-sm text-ink2">“{i.message}”</p>}
+              </div>
+              <select
+                className="input w-auto"
+                value={i.status}
+                disabled={busy}
+                onChange={(e) => run(() => call(`/api/admin/intros/${i.id}`, 'PATCH', { status: e.target.value }))}
+              >
+                {['new', 'introduced', 'declined'].map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tab === 'proofs' && (
+        <ul className="mt-6 space-y-2">
+          {proofs.length === 0 && <li className="text-ink2">No stories yet.</li>}
+          {proofs.map((pr) => (
+            <li key={pr.id} className={`card flex flex-wrap items-start justify-between gap-3 p-4 ${pr.status === 'live' ? '' : 'opacity-50'}`}>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-xs text-ink2">
+                  {pr.author || 'anonymous'}{pr.city ? ` · ${pr.city}` : ''} · {pr.frequency} · pay: {pr.pay} · {pr.who} · on{' '}
+                  <a href={`/problems/${pr.problem_id}`} target="_blank" rel="noopener noreferrer" className="underline">{pr.problem}</a>
+                </p>
+                <p className="mt-1 text-sm">{pr.story}</p>
+              </div>
+              <button
+                className="chip"
+                disabled={busy}
+                onClick={() => run(() => call(`/api/admin/proofs/${pr.id}`, 'PATCH', { status: pr.status === 'live' ? 'hidden' : 'live' }))}
+              >
+                {pr.status === 'live' ? 'Hide' : 'Show'}
+              </button>
             </li>
           ))}
         </ul>
