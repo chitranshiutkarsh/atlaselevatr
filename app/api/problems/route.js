@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { listProblems } from '@/lib/queries';
+import { recommendStartups } from '@/lib/engine';
 import { INDUSTRIES, LIMITS } from '@/lib/constants';
 import { CONTINENT_OF, CONTINENTS } from '@/lib/geo';
 import { ipHash, getVisitorId, getRefCode, jsonError } from '@/lib/security';
@@ -71,7 +72,16 @@ export async function POST(request) {
       VALUES (${title}, ${details || null}, ${industry}, ${solution}, ${country}, ${CONTINENT_OF[country]},
               ${author || null}, ${getRefCode()}, ${getVisitorId({ create: true })}, ${ip})
       RETURNING id`;
-    return Response.json({ ok: true, id: row.id }, { status: 201 });
+    // Run the startup engine straight away so the problem page, gap finder
+    // and digest know who is already working on it.
+    let startups = null;
+    try {
+      const r = await recommendStartups({ id: row.id, title, details, industry, country }, { limit: 3 });
+      startups = { ...r.totals, top: [...r.local, ...r.world].slice(0, 3).map((c) => c.name) };
+    } catch (err) {
+      console.error('startup engine failed', err);
+    }
+    return Response.json({ ok: true, id: row.id, startups }, { status: 201 });
   } catch (err) {
     console.error(err);
     return jsonError('Could not save your problem. Please try again.', 500);
