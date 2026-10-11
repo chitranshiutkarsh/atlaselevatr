@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { notifyFollowers } from '@/lib/follow';
 import { listComments } from '@/lib/queries';
 import { ipHash, getVisitorId, jsonError } from '@/lib/security';
 
@@ -48,6 +49,7 @@ export async function POST(request, { params }) {
     const [row] = await sql`INSERT INTO problem_comments (problem_id, kind, body, author, visitor_id, ip_hash)
       VALUES (${id}, ${kind}, ${text}, ${author || null}, ${getVisitorId({ create: true })}, ${ip})
       RETURNING id, kind, body, author, helpful, created_at`;
+    if (kind === 'solution') await notifyFollowers(id, 'solution', { author, body: text });
     return Response.json({ comment: row }, { status: 201 });
   } catch (err) {
     console.error(err);
