@@ -32,7 +32,7 @@ export async function POST(request) {
   const industry = body.industry;
 
   if (name.length < 2) return jsonError('Add the startup name.');
-  if (problem.length < 15) return jsonError('Describe the problem it solves in a sentence.');
+  if (problem.length < 15 && !body.problem_id) return jsonError('Describe the problem it solves in a sentence.');
   if (!CONTINENT_OF[country]) return jsonError('Pick a country.');
   if (!INDUSTRIES.includes(industry)) return jsonError('Pick a category.');
   if (website && !/^https?:\/\//i.test(website)) website = `https://${website}`;
@@ -51,13 +51,31 @@ export async function POST(request) {
       WHERE ip_hash = ${ip} AND created_at > now() - interval '1 hour'`;
     if (recent >= 5) return jsonError('Too many submissions from this network. Try again later.', 429);
 
-    const [existing] = await sql`SELECT name FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
+    // Optional: the problem this startup works on (when added from a problem page).
+    const problemId = parseInt(body.problem_id, 10) || null;
+    const [linkTo] = problemId ? await sql`SELECT id FROM problems WHERE id = ${problemId} AND status = 'live'` : [];
+    const [existing] = await sql`SELECT id, name FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
+    if (problem.length < 15 && !(existing && linkTo)) return jsonError('Say in a sentence what the startup does.');
+    if (existing && linkTo && problem.length < 15) {
+      // Just linking a known startup; no details to review.
+      await sql`INSERT INTO problem_startups (problem_id, company_id, source) VALUES (${linkTo.id}, ${existing.id}, 'community')
+        ON CONFLICT DO NOTHING`;
+      return Response.json({ ok: true, linked: true, name: existing.name }, { status: 201 });
+    }
+    if (existing && linkTo) {
+      // Already in the directory: link it to the problem straight away.
+      await sql`INSERT INTO problem_startups (problem_id, company_id, source) VALUES (${linkTo.id}, ${existing.id}, 'community')
+        ON CONFLICT DO NOTHING`;
+    }
     await sql`INSERT INTO company_submissions
-      (name, country, industry, sector, city, problem, website, founded, submitter, contact, visitor_id, ip_hash)
+      (name, country, industry, sector, city, problem, website, founded, submitter, contact, visitor_id, ip_hash, problem_id)
       VALUES (${name}, ${country}, ${industry}, ${sector}, ${city}, ${problem}, ${website},
               ${founded > 1900 && founded <= 2100 ? founded : null}, ${submitter}, ${contact},
-              ${getVisitorId({ create: true })}, ${ip})`;
-    return Response.json({ ok: true, updatesExisting: Boolean(existing) }, { status: 201 });
+              ${getVisitorId({ create: true })}, ${ip}, ${linkTo?.id || null})`;
+    return Response.json(
+      { ok: true, updatesExisting: Boolean(existing), linked: Boolean(existing && linkTo), name: existing?.name || name },
+      { status: 201 }
+    );
   } catch (err) {
     console.error(err);
     return jsonError('Could not save. Please try again.', 500);
