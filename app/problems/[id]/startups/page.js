@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import StartupMatchCard from '@/components/StartupMatchCard';
-import StartupSuggest from '@/components/StartupSuggest';
+import StartupForm from '@/components/StartupForm';
 import GapBadge from '@/components/GapBadge';
 import SetupNotice from '@/components/SetupNotice';
 import { getProblem } from '@/lib/queries';
@@ -95,7 +95,7 @@ export default async function ProblemStartupsPage({ params }) {
         </div>
 
         <aside className="space-y-4">
-          <StartupSuggest problemId={problem.id} defaultIndustry={problem.industry} />
+          <StartupForm problem={{ id: problem.id, industry: problem.industry, country: problem.country }} />
           <div className="card p-5 text-sm text-ink2">
             <p className="label">How matching works</p>
             <p className="mt-2">
