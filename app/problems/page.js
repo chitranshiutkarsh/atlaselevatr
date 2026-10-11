@@ -1,14 +1,25 @@
 import Link from 'next/link';
 import LiveLeaderboard from '@/components/LiveLeaderboard';
+import GapList from '@/components/GapList';
 import SetupNotice from '@/components/SetupNotice';
-import DigestSignup from '@/components/DigestSignup';
-import { listProblems, getStats, MERIT_FORMULA } from '@/lib/queries';
-import { INDUSTRIES } from '@/lib/constants';
-import { CONTINENTS, prettyName } from '@/lib/geo';
+import { listProblems, listGaps, getStats, MERIT_FORMULA, GAP_FORMULA } from '@/lib/queries';
+import { refreshCoverage } from '@/lib/engine';
+import { INDUSTRIES, VALIDATION } from '@/lib/constants';
+import { CONTINENTS, CONTINENT_OF, COUNTRIES, prettyName } from '@/lib/geo';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
-export const metadata = { title: 'Leaderboard' };
+export const metadata = {
+  title: 'Problems',
+  description: 'Every problem on Atlas: the ones most people face, the gaps no startup is building, and the newest.',
+};
+
+const TABS = [
+  ['top', 'Most faced'],
+  ['gaps', 'Gaps: no one building'],
+  ['new', 'Newest'],
+  ['discover', '🎲 Discover'],
+];
 
 function href(current, change) {
   const next = { ...current, ...change };
@@ -18,52 +29,95 @@ function href(current, change) {
   return `/problems${qs ? `?${qs}` : ''}`;
 }
 
-function timeAgo(date) {
-  const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
-}
-
+// One place for every problem. Tabs replace the separate leaderboard and gap
+// finder: same filters, different ordering.
 export default async function ProblemsPage({ searchParams }) {
   const industry = INDUSTRIES.includes(searchParams.industry) ? searchParams.industry : null;
-  const continent = CONTINENTS.some((c) => c.name === searchParams.continent) ? searchParams.continent : null;
-  const sort = ['new', 'merit', 'discover'].includes(searchParams.sort) ? searchParams.sort : 'top';
-  const current = { industry, continent, sort: sort === 'top' ? null : sort };
+  const country = CONTINENT_OF[searchParams.country] ? searchParams.country : null;
+  const continent = !country && CONTINENTS.some((c) => c.name === searchParams.continent) ? searchParams.continent : null;
+  const q = typeof searchParams.q === 'string' ? searchParams.q.trim().slice(0, 80) || null : null;
+  const view = searchParams.view === 'gaps' ? 'gaps' : null;
+  const sort = view ? 'gaps' : ['new', 'merit', 'discover'].includes(searchParams.sort) ? searchParams.sort : 'top';
+  const current = { view, sort: ['new', 'merit', 'discover'].includes(sort) ? sort : null, industry, continent, country, q };
 
-  let problems;
+  let problems = [];
+  let gaps = [];
+  let pending = 0;
   let stats;
   try {
-    [problems, stats] = await Promise.all([listProblems({ industry, continent, sort, limit: 100 }), getStats()]);
+    if (view === 'gaps') {
+      pending = await refreshCoverage({ max: 12 });
+      [gaps, stats] = await Promise.all([listGaps({ industry, continent, country, q }), getStats()]);
+    } else {
+      [problems, stats] = await Promise.all([listProblems({ industry, continent, country, q, sort, limit: 100 }), getStats()]);
+    }
   } catch (err) {
     console.error(err);
     return <SetupNotice error={err.message} />;
   }
+
   const maxIndustryVotes = Math.max(1, ...stats.industries.map((i) => i.votes));
+  const tabHref = (key) =>
+    key === 'gaps' ? href(current, { view: 'gaps', sort: null }) : href(current, { view: null, sort: key === 'top' ? null : key });
+  const where = country ? prettyName(country) : continent;
+  const empty = view === 'gaps' ? gaps.length === 0 : problems.length === 0;
 
   return (
     <div className="pt-12">
-      <p className="label">Dashboard</p>
-      <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Problem leaderboard</h1>
+      <p className="label">Problems</p>
+      <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+        {view === 'gaps' ? "Wanted, but no one's building it" : 'Problems people face'}
+        {where ? <span className="text-ink2"> in {where}</span> : null}
+      </h1>
       <p className="mt-3 max-w-2xl text-ink2">
-        Ranked by votes from everyone on Atlas. One vote per person per problem. No sign-up needed. Tap “This happens to
-        me” to add first-hand proof: {stats.validated} problem{stats.validated === 1 ? ' is' : 's are'} validated so far.
+        {view === 'gaps'
+          ? 'Problems with the most unmet demand: many people face them, few startups work on them where they happen.'
+          : `Tap ▲ if you face a problem. Add a one-line story to make it evidence: ${VALIDATION.proofs} stories validate a problem for founders. ${stats.validated} validated so far, ${stats.claimed} claimed by builders.`}
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="mt-6 flex flex-wrap gap-1 border-b border-ink/10">
+        {TABS.map(([key, label]) => (
+          <Link
+            key={key}
+            href={tabHref(key)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold transition ${
+              sort === key ? 'border-signal text-ink' : 'border-transparent text-ink2 hover:text-ink'
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
         <section>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link href={href(current, { sort: null })} className={sort === 'top' ? 'chip-on' : 'chip'}>Top voted</Link>
-            <Link href={href(current, { sort: 'merit' })} className={sort === 'merit' ? 'chip-on' : 'chip'}>Atlas score</Link>
-            <Link href={href(current, { sort: 'discover' })} className={sort === 'discover' ? 'chip-on' : 'chip'}>🎲 Discover</Link>
-            <Link href={href(current, { sort: 'new' })} className={sort === 'new' ? 'chip-on' : 'chip'}>Newest</Link>
-            <span className="mx-1 h-5 w-px bg-ink/15" />
-            <Link href={href(current, { continent: null })} className={!continent ? 'chip-on' : 'chip'}>All regions</Link>
+          <form action="/problems" method="get" className="flex flex-col gap-2 sm:flex-row">
+            {view && <input type="hidden" name="view" value={view} />}
+            {current.sort && <input type="hidden" name="sort" value={current.sort} />}
+            {industry && <input type="hidden" name="industry" value={industry} />}
+            <input
+              name="q"
+              defaultValue={q || ''}
+              className="input sm:flex-1"
+              placeholder="Search problems, e.g. clinics, traffic, rent"
+              maxLength={80}
+              aria-label="Search problems"
+            />
+            <select name="country" defaultValue={country || ''} className="input sm:w-48" aria-label="Country">
+              <option value="">All countries</option>
+              {COUNTRIES.map((c) => <option key={c} value={c}>{prettyName(c)}</option>)}
+            </select>
+            <button className="btn-primary">Search</button>
+          </form>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href={href(current, { continent: null, country: null })} className={!continent && !country ? 'chip-on' : 'chip'}>All regions</Link>
             {CONTINENTS.map((c) => (
-              <Link key={c.slug} href={href(current, { continent: c.name })} className={continent === c.name ? 'chip-on' : 'chip'}>
+              <Link key={c.slug} href={href(current, { continent: c.name, country: null })} className={continent === c.name ? 'chip-on' : 'chip'}>
                 {c.name}
               </Link>
             ))}
+            {country && <span className="chip-on">{prettyName(country)}</span>}
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link href={href(current, { industry: null })} className={!industry ? 'chip-on' : 'chip'}>All industries</Link>
@@ -74,12 +128,26 @@ export default async function ProblemsPage({ searchParams }) {
             ))}
           </div>
 
-          {problems.length === 0 ? (
+          {q && (
+            <p className="mt-4 text-sm text-ink2">
+              Results for “{q}”. <Link href={href(current, { q: null })} className="underline hover:text-ink">Clear search</Link>
+            </p>
+          )}
+
+          {empty ? (
             <div className="card mt-6 p-8 text-center">
-              <p className="font-display text-2xl font-semibold">No problems here yet</p>
-              <p className="mt-2 text-ink2">Be the first to put one on the map.</p>
-              <Link href="/submit" className="btn-primary mt-5">+ Add a problem</Link>
+              <p className="font-display text-2xl font-semibold">{q ? 'Nothing matches that yet' : 'No problems here yet'}</p>
+              <p className="mt-2 text-ink2">
+                {view === 'gaps' ? 'Add a problem you face and the engine will check who’s solving it.' : 'Be the first to put one on the map.'}
+              </p>
+              <Link href={`/submit${country ? `?country=${encodeURIComponent(country)}` : ''}`} className="btn-primary mt-5">+ Add a problem</Link>
             </div>
+          ) : view === 'gaps' ? (
+            <>
+              <p className="mt-4 font-mono text-[11px] uppercase tracking-wide text-ink2">Ranked by {GAP_FORMULA}</p>
+              {pending > 0 && <p className="mt-1 text-xs text-ink2">Matching new problems against the directory… refresh in a moment for more.</p>}
+              <GapList gaps={gaps} />
+            </>
           ) : (
             <LiveLeaderboard
               key={problems.map((p) => p.id).join(',')}
@@ -90,6 +158,8 @@ export default async function ProblemsPage({ searchParams }) {
                 limit: '100',
                 ...(industry ? { industry } : {}),
                 ...(continent ? { continent } : {}),
+                ...(country ? { country } : {}),
+                ...(q ? { q } : {}),
                 ...(sort !== 'top' ? { sort } : {}),
               }).toString()}
             />
@@ -97,25 +167,29 @@ export default async function ProblemsPage({ searchParams }) {
         </section>
 
         <aside className="space-y-4">
-          <div className="card grid grid-cols-2 gap-4 p-5">
-            {[
-              ['Problems', stats.problems],
-              ['Votes', stats.votes],
-              ['Face it', stats.proofs],
-              ['Validated', stats.validated],
-              ['Countries', stats.countries],
-              ['Members', stats.members],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <p className="label">{label}</p>
-                <p className="font-display text-3xl font-semibold">{value.toLocaleString('en-IN')}</p>
-              </div>
-            ))}
+          <Link href="/submit" className="btn-primary w-full">+ Add a problem</Link>
+          <div className="card p-5 text-sm">
+            <p className="label">How a problem becomes a company</p>
+            <ol className="mt-3 space-y-2">
+              {[
+                ['▲', 'Face it', 'People say they have the problem.'],
+                ['🙋', 'Validate', `${VALIDATION.proofs} first-hand stories.`],
+                ['◎', 'Gap check', 'Is anyone already solving it here?'],
+                ['🚀', 'Claim', 'A builder takes it on.'],
+                ['★', 'Studio', 'The venture studio backs the best.'],
+              ].map(([icon, t, d]) => (
+                <li key={t} className="flex gap-2">
+                  <span className="w-5 shrink-0 text-center">{icon}</span>
+                  <span><span className="font-semibold">{t}.</span> <span className="text-ink2">{d}</span></span>
+                </li>
+              ))}
+            </ol>
+            <Link href="/studio" className="mt-3 inline-block font-semibold text-signal hover:underline">How the studio works →</Link>
           </div>
           <div className="card p-5">
-            <p className="label">Where the votes are going</p>
+            <p className="label">Where people face problems</p>
             {stats.industries.length === 0 ? (
-              <p className="mt-3 text-sm text-ink2">Votes will show up here.</p>
+              <p className="mt-3 text-sm text-ink2">This fills up as people say they face problems.</p>
             ) : (
               <ul className="mt-3 space-y-3">
                 {stats.industries.map((row) => (
@@ -124,7 +198,7 @@ export default async function ProblemsPage({ searchParams }) {
                       <Link href={href(current, { industry: row.industry })} className="font-medium hover:text-signal">
                         {row.industry}
                       </Link>
-                      <span className="font-mono text-xs text-ink2">{row.votes} votes</span>
+                      <span className="font-mono text-xs text-ink2">{row.votes} face it</span>
                     </div>
                     <div className="mt-1 h-1.5 rounded-full bg-paper2">
                       <div className="h-1.5 rounded-full bg-signal" style={{ width: `${(row.votes / maxIndustryVotes) * 100}%` }} />
@@ -134,12 +208,6 @@ export default async function ProblemsPage({ searchParams }) {
               </ul>
             )}
           </div>
-          <Link href="/gaps" className="card block p-5 hover:border-ink">
-            <p className="label">Gap finder</p>
-            <p className="mt-1 font-semibold">Problems no startup is building yet →</p>
-          </Link>
-          <DigestSignup compact />
-          <Link href="/submit" className="btn-primary w-full">+ Add a problem</Link>
         </aside>
       </div>
     </div>
