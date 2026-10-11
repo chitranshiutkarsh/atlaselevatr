@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS } from '@/lib/constants';
 import { ipHash, getVisitorId, getRefCode, jsonError } from '@/lib/security';
 import { getUserId } from '@/lib/auth';
+import { notifyFollowers } from '@/lib/follow';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -71,6 +72,11 @@ export async function POST(request, { params }) {
         pitch = COALESCE(EXCLUDED.pitch, builder_interests.pitch)
       RETURNING id`;
     const [{ builders }] = await sql`SELECT count(*)::int AS builders FROM builder_interests WHERE problem_id = ${id}`;
+    await notifyFollowers(id, 'claim', {
+      name: isPublic ? name.split(' ')[0] : null,
+      stage: BUILDER_STAGES.find(([k]) => k === stage)?.[1].toLowerCase(),
+      email,
+    });
     return Response.json({ ok: true, builders, id: saved.id, is_public: isPublic }, { status: 201 });
   } catch (err) {
     console.error(err);
