@@ -4,6 +4,7 @@ import { recommendStartups } from '@/lib/engine';
 import { INDUSTRIES, LIMITS } from '@/lib/constants';
 import { CONTINENT_OF, CONTINENTS } from '@/lib/geo';
 import { ipHash, getVisitorId, getRefCode, jsonError } from '@/lib/security';
+import { followProblem } from '@/lib/follow';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -19,6 +20,7 @@ export async function GET(request) {
       country: country && CONTINENT_OF[country] ? country : null,
       industry: INDUSTRIES.includes(industry) ? industry : null,
       sort: ['new', 'merit', 'discover'].includes(p.get('sort')) ? p.get('sort') : 'top',
+      q: (p.get('q') || '').trim().slice(0, 80) || null,
       limit: p.get('limit') || 20,
       offset: p.get('offset') || 0,
     });
@@ -58,6 +60,8 @@ export async function POST(request) {
   if (solution.length < LIMITS.solutionMin) return jsonError('Tell us how you would solve it (a sentence or two).');
   if (!INDUSTRIES.includes(industry)) return jsonError('Pick an industry.');
   if (!CONTINENT_OF[country]) return jsonError('Pick a country.');
+  const followEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 120) : '';
+  if (followEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(followEmail)) return jsonError('That email does not look right.');
 
   try {
     const sql = await db();
@@ -72,6 +76,7 @@ export async function POST(request) {
       VALUES (${title}, ${details || null}, ${industry}, ${solution}, ${country}, ${CONTINENT_OF[country]},
               ${author || null}, ${getRefCode()}, ${getVisitorId({ create: true })}, ${ip})
       RETURNING id`;
+    if (followEmail) await followProblem(row.id, followEmail, ip).catch((err) => console.error('follow failed', err));
     // Run the startup engine straight away so the problem page, gap finder
     // and digest know who is already working on it.
     let startups = null;
