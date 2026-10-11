@@ -22,9 +22,9 @@ export default function Nav({ signedIn = false }) {
   return (
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-paper/85 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-baseline gap-2" onClick={() => setOpen(false)}>
+        <Link href="/" className="flex flex-col leading-none" onClick={() => setOpen(false)}>
           <span className="font-display text-2xl font-semibold tracking-tight">Atlas</span>
-          <span className="label hidden sm:inline">by {SITE.parent}</span>
+          <span className="mt-0.5 text-[11px] text-ink2">by {SITE.parent}</span>
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
