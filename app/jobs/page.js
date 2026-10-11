@@ -1,6 +1,7 @@
 import SetupNotice from '@/components/SetupNotice';
 import { listJobs } from '@/lib/queries';
-import { MAX_ACTIVE_JOBS } from '@/lib/constants';
+import Link from 'next/link';
+import { MAX_ACTIVE_JOBS, INDUSTRIES } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -13,9 +14,10 @@ const SEARCHES = [
 ];
 
 export default async function JobsPage({ searchParams }) {
+  const industry = INDUSTRIES.includes(searchParams.industry) ? searchParams.industry : null;
   let jobs;
   try {
-    jobs = await listJobs();
+    jobs = await listJobs({ industry });
   } catch (err) {
     console.error(err);
     return <SetupNotice error={err.message} />;
@@ -30,8 +32,13 @@ export default async function JobsPage({ searchParams }) {
       <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Get paid to solve problems</h1>
       <p className="mt-3 max-w-2xl text-ink2">
         Hand-picked strategy, founder&apos;s office and problem-solving roles from LinkedIn, IIM Jobs and company sites.
-        Click apply to go straight to the original posting.
+        Click apply to go straight to the original posting. Jobs tagged to a problem also show on that problem&apos;s page.
       </p>
+      {industry && (
+        <p className="mt-4 text-sm">
+          Showing {industry} roles. <a href="/jobs" className="font-semibold text-signal hover:underline">See all jobs</a>
+        </p>
+      )}
 
       {sources.length > 1 && (
         <div className="mt-6 flex flex-wrap gap-2">
@@ -70,6 +77,12 @@ export default async function JobsPage({ searchParams }) {
                 </span>
               </div>
               {job.focus && <p className="mt-3 text-sm">{job.focus}</p>}
+              {job.problem && (
+                <p className="mt-2 text-sm text-ink2">
+                  Works on:{' '}
+                  <Link href={`/problems/${job.problem_id}`} className="font-semibold text-ink hover:text-signal">{job.problem}</Link>
+                </p>
+              )}
               <div className="mt-auto flex items-center justify-between pt-4">
                 <span className="font-mono text-xs text-ink2">{job.location || 'Location flexible'}</span>
                 <a href={job.url} target="_blank" rel="noopener noreferrer" className="btn-primary px-4 py-2">
