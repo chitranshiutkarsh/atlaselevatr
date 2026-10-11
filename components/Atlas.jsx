@@ -223,6 +223,12 @@ export default function Atlas({ unicorns, countryCounts }) {
                   ))}
                 </ul>
               )}
+              <Link
+                href={`/problems?${country ? `country=${encodeURIComponent(country)}` : `continent=${encodeURIComponent(continent || '')}`}`}
+                className="mt-3 inline-block text-xs font-semibold text-signal hover:underline"
+              >
+                All problems in {country ? prettyName(country) : continent} →
+              </Link>
             </div>
           )}
         </aside>

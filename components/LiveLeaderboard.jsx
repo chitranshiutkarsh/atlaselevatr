@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import VoteButton from './VoteButton';
+import StageBadge from './StageBadge';
 import { prettyName } from '@/lib/geo';
 
 const POLL_MS = 15000;
@@ -95,7 +96,7 @@ export default function LiveLeaderboard({ initial, sort, query, formula }) {
         const latest = new Map(problems.map((p) => [p.id, p]));
         reorder((prev) => {
           const known = new Set(prev.map((p) => p.id));
-          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments, builders: latest.get(p.id).builders, proofs: latest.get(p.id).proofs, validated: latest.get(p.id).validated, merit: latest.get(p.id).merit, views: latest.get(p.id).views } : p));
+          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments, builders: latest.get(p.id).builders, proofs: latest.get(p.id).proofs, validated: latest.get(p.id).validated, studio: latest.get(p.id).studio, merit: latest.get(p.id).merit, views: latest.get(p.id).views } : p));
           // Discover is a fresh shuffle each visit: update numbers, don't add or reorder.
           const added = sort === 'discover' ? [] : problems.filter((p) => !known.has(p.id));
           return [...updated, ...added];
@@ -129,7 +130,7 @@ export default function LiveLeaderboard({ initial, sort, query, formula }) {
         <div className="mb-3 flex items-center justify-between text-xs text-ink2">
           <span className="flex items-center gap-2">
             <span className={`inline-block h-2 w-2 rounded-full ${live ? 'animate-pulse bg-moss' : 'bg-ink2/40'}`} />
-            {live ? 'Live: ranks update as people vote' : 'Live updates paused'}
+            {live ? 'Live: ranks update as people say they face a problem' : 'Live updates paused'}
           </span>
           <button onClick={() => setLive((l) => !l)} className="underline hover:text-ink">
             {live ? 'Pause' : 'Resume'}
@@ -157,28 +158,26 @@ export default function LiveLeaderboard({ initial, sort, query, formula }) {
               <div className="min-w-0 flex-1">
                 <h2 className="text-lg font-semibold leading-snug">
                   <Link href={`/problems/${p.id}`} className="hover:text-signal">{p.title}</Link>
-                  {p.validated && (
-                    <span className="ml-2 inline-flex rounded-full bg-moss px-2 py-0.5 align-middle font-mono text-[9px] uppercase tracking-wide text-white">
-                      ✓ Validated
-                    </span>
-                  )}
+                  <span className="ml-2 align-middle">
+                    <StageBadge problem={p} small showOpen={false} />
+                  </span>
                 </h2>
                 <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink2">
                   {p.industry} · {prettyName(p.country)} · {timeAgo(p.created_at)}
                   {p.author ? ` · by ${p.author}` : ''}
                   {` · 👁 ${p.views || 0}`}
-                  {typeof p.merit === 'number' ? ` · score ${Math.round(p.merit)}` : ''}
+                  {sort === 'merit' && typeof p.merit === 'number' ? ` · score ${Math.round(p.merit)}` : ''}
                 </p>
                 {p.details && <p className="mt-2 text-sm text-ink2">{p.details}</p>}
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                  <Link href={`/problems/${p.id}`} className="font-semibold text-signal hover:underline">
-                    {p.comments > 0 ? `💡 ${p.comments} suggestion${p.comments === 1 ? '' : 's'} →` : '💡 Suggest a solution →'}
-                  </Link>
                   <Link href={`/problems/${p.id}#proof`} className="font-semibold text-moss hover:underline">
-                    🙋 {p.proofs > 0 ? `${p.proofs} face${p.proofs === 1 ? 's' : ''} this` : 'This happens to me'}
+                    🙋 {p.proofs > 0 ? `${p.proofs} ${p.proofs === 1 ? 'story' : 'stories'}` : 'Add your story'}
+                  </Link>
+                  <Link href={`/problems/${p.id}#solutions`} className="font-semibold text-signal hover:underline">
+                    💡 {p.comments + (p.solution ? 1 : 0) > 0 ? `${p.comments + (p.solution ? 1 : 0)} idea${p.comments + (p.solution ? 1 : 0) === 1 ? '' : 's'}` : 'Suggest a fix'}
                   </Link>
                   <Link href={`/problems/${p.id}#build`} className="font-semibold text-ink hover:text-signal">
-                    🚀 {p.builders > 0 ? `${p.builders} want${p.builders === 1 ? 's' : ''} to build this` : 'Want to build this?'}
+                    🚀 {p.builders > 0 ? `${p.builders} building` : 'Claim it'}
                   </Link>
                   {p.source && (
                     <span className="font-mono text-[11px] text-ink2">

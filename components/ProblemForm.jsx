@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { INDUSTRIES, LIMITS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
 
-export default function ProblemForm({ defaultCountry }) {
+export default function ProblemForm({ defaultCountry, email: knownEmail = '' }) {
+  const router = useRouter();
   const started = useRef(0);
   const [form, setForm] = useState({
     title: '',
@@ -14,13 +16,38 @@ export default function ProblemForm({ defaultCountry }) {
     solution: '',
     country: defaultCountry,
     author: '',
+    email: knownEmail,
     website: '',
   });
   const [status, setStatus] = useState({ state: 'idle', message: '' });
+  const [similar, setSimilar] = useState([]);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     started.current = Date.now();
   }, []);
+
+  // "Might it already be on Atlas?" Look for similar problems as people type.
+  useEffect(() => {
+    const text = `${form.title} ${form.details}`.trim();
+    if (form.title.trim().length < 12) {
+      setSimilar([]);
+      return;
+    }
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/problems/similar?q=${encodeURIComponent(text.slice(0, 300))}`, { signal: ctrl.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        setSimilar(data.problems || []);
+      } catch {}
+    }, 450);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [form.title, form.details]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -35,48 +62,11 @@ export default function ProblemForm({ defaultCountry }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      setStatus({ state: 'done', message: String(data.id || ''), startups: data.startups || null });
+      // Straight to the new problem: who's solving it, and a nudge to share.
+      router.push(`/problems/${data.id}?new=1${form.email ? '&following=1' : ''}`);
     } catch (err) {
       setStatus({ state: 'error', message: err.message });
     }
-  }
-
-  if (status.state === 'done') {
-    return (
-      <div className="card mt-8 p-8">
-        <p className="label text-moss">Live now</p>
-        <h2 className="mt-2 font-display text-3xl font-semibold">Your problem is on the map.</h2>
-        <p className="mt-2 text-ink2">Get people to vote for it. Share your invite link so the votes count toward you.</p>
-        {status.startups && (
-          <p className="mt-4 rounded-lg bg-paper2/60 p-4 text-sm">
-            {status.startups.world === 0 ? (
-              <>The startup engine found <span className="font-semibold">no startup on Atlas working on this yet</span>. That&apos;s an open gap.</>
-            ) : (
-              <>
-                The startup engine found <span className="font-semibold">{status.startups.world} startup{status.startups.world === 1 ? '' : 's'}</span>{' '}
-                working on something like this ({status.startups.local} in your country)
-                {status.startups.top.length ? `, including ${status.startups.top.join(', ')}` : ''}.
-              </>
-            )}
-          </p>
-        )}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={status.message ? `/problems/${status.message}` : '/problems?sort=new'} className="btn-primary">See your problem</Link>
-          {status.message && <Link href={`/problems/${status.message}/startups`} className="btn-ghost">See who&apos;s solving it</Link>}
-          <Link href="/invite" className="btn-ghost">Get my invite link</Link>
-          <button
-            className="btn-ghost"
-            onClick={() => {
-              setForm((f) => ({ ...f, title: '', details: '', solution: '' }));
-              started.current = Date.now();
-              setStatus({ state: 'idle', message: '' });
-            }}
-          >
-            Add another
-          </button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -93,6 +83,30 @@ export default function ProblemForm({ defaultCountry }) {
           maxLength={LIMITS.titleMax}
           required
         />
+        {similar.length > 0 && !dismissed && (
+          <div className="mt-3 rounded-lg border border-signal/30 bg-signal/5 p-4">
+            <p className="text-sm font-semibold">Someone may have raised this already. Is it one of these?</p>
+            <p className="text-xs text-ink2">Backing an existing problem adds your voice to it instead of splitting the count.</p>
+            <ul className="mt-3 space-y-2">
+              {similar.map((p) => (
+                <li key={p.id} className="flex items-center justify-between gap-3 rounded-lg bg-paper p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{p.title}</p>
+                    <p className="font-mono text-[10px] uppercase text-ink2">
+                      {p.industry} · {prettyName(p.country)} · ▲ {p.votes} face it
+                    </p>
+                  </div>
+                  <Link href={`/problems/${p.id}#proof`} className="btn-primary shrink-0 px-3 py-1.5 text-xs">
+                    I face this →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <button type="button" className="mt-3 text-xs font-semibold text-ink2 underline hover:text-ink" onClick={() => setDismissed(true)}>
+              None of these. Mine is different.
+            </button>
+          </div>
+        )}
       </div>
 
       <div>
@@ -152,6 +166,19 @@ export default function ProblemForm({ defaultCountry }) {
           value={form.author}
           onChange={set('author')}
           maxLength={LIMITS.nameMax}
+        />
+      </div>
+
+      <div>
+        <label className="label" htmlFor="follow-email">Email me when someone builds this or suggests a fix (optional)</label>
+        <input
+          id="follow-email"
+          type="email"
+          className="input mt-2"
+          placeholder="you@email.com · never shown, one email per update"
+          value={form.email}
+          onChange={set('email')}
+          maxLength={120}
         />
       </div>
 

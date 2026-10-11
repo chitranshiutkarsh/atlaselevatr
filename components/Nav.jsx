@@ -5,14 +5,13 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { SITE } from '@/lib/constants';
 
+// Kept short on purpose: the loop is map → problems → startups → studio.
+// Jobs, Invite and About live in the footer and in My Atlas.
 const LINKS = [
   { href: '/', label: 'Atlas' },
-  { href: '/problems', label: 'Leaderboard' },
-  { href: '/gaps', label: 'Gaps' },
-  { href: '/builders', label: 'Builders' },
+  { href: '/problems', label: 'Problems' },
   { href: '/startups', label: 'Startups' },
-  { href: '/jobs', label: 'Jobs' },
-  { href: '/invite', label: 'Invite' },
+  { href: '/studio', label: 'Studio' },
 ];
 
 export default function Nav({ signedIn = false }) {

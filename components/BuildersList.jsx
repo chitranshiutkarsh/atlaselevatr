@@ -95,7 +95,7 @@ function UpdateForm({ builder, onPosted }) {
 }
 
 // Public builder cards on a problem: who has claimed it, what they need, their progress.
-export default function BuildersList({ initial }) {
+export default function BuildersList({ initial, embedded = false }) {
   const [builders, setBuilders] = useState(initial);
   const [introFor, setIntroFor] = useState(null);
   const [introSent, setIntroSent] = useState(new Set());
@@ -104,7 +104,7 @@ export default function BuildersList({ initial }) {
   if (builders.length === 0) return null;
 
   return (
-    <section id="builders" className="mt-10 scroll-mt-24">
+    <section id="builders" className={`scroll-mt-24 ${embedded ? '' : 'mt-10'}`}>
       <p className="label">Builders on this problem</p>
       <h2 className="mt-1 font-display text-2xl font-semibold">
         {builders.length} {builders.length === 1 ? 'person has' : 'people have'} claimed this

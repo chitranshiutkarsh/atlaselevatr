@@ -17,7 +17,7 @@ async function call(url, method, body) {
   return data;
 }
 
-const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '' };
+const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '', industry: '', problem_id: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
 export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [] }) {
@@ -109,6 +109,11 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
             </select>
             <input className="input" placeholder="Apply link (https://…) *" value={job.url} onChange={(e) => setJob({ ...job, url: e.target.value })} required />
             <input className="input" placeholder="What problem does this role solve?" value={job.focus} onChange={(e) => setJob({ ...job, focus: e.target.value })} />
+            <select className="input" value={job.industry} onChange={(e) => setJob({ ...job, industry: e.target.value })}>
+              <option value="">Industry (shows the job on matching problems)</option>
+              {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
+            </select>
+            <input className="input" inputMode="numeric" placeholder="Problem # it works on (optional, from the problem URL)" value={job.problem_id} onChange={(e) => setJob({ ...job, problem_id: e.target.value.replace(/\D/g, '') })} />
             <button className="btn-primary w-full" disabled={busy || activeJobs >= MAX_ACTIVE_JOBS}>
               {activeJobs >= MAX_ACTIVE_JOBS ? 'Board full (50)' : 'Add job'}
             </button>

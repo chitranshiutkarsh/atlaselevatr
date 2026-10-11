@@ -33,8 +33,8 @@ export default function ShareBar({ url, title, faced, refCode }) {
   }
 
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-2">
-      <span className="label mr-1">Rally people who face it</span>
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="label mr-1">Share</span>
       {targets.map(([name, href]) => (
         <a key={name} href={href} target="_blank" rel="noopener noreferrer" className="chip">
           {name}
@@ -45,7 +45,7 @@ export default function ShareBar({ url, title, faced, refCode }) {
         <button onClick={native} className="chip sm:hidden">More…</button>
       )}
       {!refCode && (
-        <a href="/invite" className="text-xs text-ink2 underline hover:text-ink">Get credit for who you bring in</a>
+        <a href="/invite" className="text-xs text-ink2 underline hover:text-ink">Get credit for everyone you bring in</a>
       )}
     </div>
   );

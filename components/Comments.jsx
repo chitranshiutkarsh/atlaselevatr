@@ -20,7 +20,9 @@ function timeAgo(iso) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-export default function Comments({ problemId, initial }) {
+// Solutions and discussion for a problem. The idea from the person who raised
+// it is pinned first, so every proposed fix lives in one thread.
+export default function Comments({ problemId, initial, raiser = null }) {
   const [comments, setComments] = useState(initial);
   const [marked, setMarked] = useState(new Set());
   const [filter, setFilter] = useState('all');
@@ -71,20 +73,22 @@ export default function Comments({ problemId, initial }) {
     } catch {}
   }
 
-  const solutions = comments.filter((c) => c.kind === 'solution').length;
+  const pinned = raiser?.solution ? 1 : 0;
+  const solutions = comments.filter((c) => c.kind === 'solution').length + pinned;
+  const showPinned = pinned && filter !== 'comment';
   const shown = comments
     .filter((c) => filter === 'all' || c.kind === filter)
     .sort((a, b) => b.helpful - a.helpful || new Date(a.created_at) - new Date(b.created_at));
 
   return (
-    <section className="mt-10">
+    <section id="solutions" className="mt-10 scroll-mt-24">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-display text-2xl font-semibold">How would you solve it?</h2>
         <div className="flex gap-1.5">
           {[
-            ['all', `All (${comments.length})`],
+            ['all', `All (${comments.length + pinned})`],
             ['solution', `Solutions (${solutions})`],
-            ['comment', `Comments (${comments.length - solutions})`],
+            ['comment', `Comments (${comments.length + pinned - solutions})`],
           ].map(([key, label]) => (
             <button key={key} onClick={() => setFilter(key)} className={filter === key ? 'chip-on' : 'chip'}>
               {label}
@@ -143,10 +147,18 @@ export default function Comments({ problemId, initial }) {
         )}
       </form>
 
+      {showPinned ? (
+        <div className="card mt-6 border-signal/40 bg-signal/5 p-4">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-signal">
+            📌 💡 Idea from the person who raised it{raiser.author ? ` · ${raiser.author}` : ''}
+          </p>
+          <p className="mt-2 whitespace-pre-line">{raiser.solution}</p>
+        </div>
+      ) : null}
       {shown.length === 0 ? (
-        <p className="mt-6 text-ink2">No suggestions yet. Be the first to propose a solution.</p>
+        !showPinned && <p className="mt-6 text-ink2">Nothing here yet. Be the first to propose a solution.</p>
       ) : (
-        <ul className="mt-6 space-y-3">
+        <ul className="mt-3 space-y-3">
           {shown.map((c) => (
             <li key={c.id} className="card p-4">
               <div className="flex items-start justify-between gap-3">

@@ -11,11 +11,12 @@ export default function Footer() {
           <p className="label mt-4">An {SITE.parent} initiative · {SITE.domain}</p>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink2">
+          <Link href="/problems" className="hover:text-ink">Problems</Link>
+          <Link href="/problems?view=gaps" className="hover:text-ink">Gaps</Link>
           <Link href="/startups" className="hover:text-ink">Startups</Link>
-          <Link href="/problems" className="hover:text-ink">Leaderboard</Link>
-          <Link href="/gaps" className="hover:text-ink">Gap finder</Link>
-          <Link href="/builders" className="hover:text-ink">Builders</Link>
+          <Link href="/studio" className="hover:text-ink">Studio &amp; builders</Link>
           <Link href="/submit" className="hover:text-ink">Add a problem</Link>
+          <Link href="/startups/add" className="hover:text-ink">List your startup</Link>
           <Link href="/jobs" className="hover:text-ink">Jobs</Link>
           <Link href="/invite" className="hover:text-ink">Invite</Link>
           <Link href="/about" className="hover:text-ink">About {SITE.parent}</Link>

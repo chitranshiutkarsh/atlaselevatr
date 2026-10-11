@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS, SITE } from '@/lib/constants';
 
 const EMPTY = { name: '', email: '', phone: '', linkedin: '', city: '', stage: '', commitment: '', needs: [], pitch: '', headline: '', is_public: true, hp: '' };
 
 // "Want to build this?" call to action and form on a problem page.
-export default function BuildInterest({ problemId, problemTitle, initialCount }) {
+// Builders who already claimed it are passed as children and shown inside.
+export default function BuildInterest({ problemId, problemTitle, initialCount, children }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(initialCount);
@@ -56,8 +58,8 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-paper/60">{SITE.parent} venture studio</p>
           <h2 className="mt-1 font-display text-2xl font-semibold">Want to build this?</h2>
           <p className="mt-1 max-w-lg text-sm text-paper/75">
-            Turn this problem into a company. {SITE.parent} helps founders go from idea to product-market fit, scale and
-            a Series A.
+            Turn this problem into a company. Claim it, and {SITE.parent} helps you go from idea to product-market fit,
+            scale and a Series A. <Link href="/studio" className="underline hover:text-paper">How it works</Link>
           </p>
           {count > 0 && (
             <p className="mt-2 text-sm font-semibold text-[#F4A27F]">
@@ -76,8 +78,21 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
         <div className="border-t border-paper/15 bg-paper p-6 text-ink">
           <p className="label text-moss">You&apos;re on the list</p>
           <p className="mt-2 font-display text-2xl font-semibold">Thanks, {f.name.split(' ')[0]}. The studio team will reach out.</p>
-          <p className="mt-2 text-sm text-ink2">
-            We review every builder for “{problemTitle}”. Meanwhile, share this problem to rally votes and potential co-founders.
+          <ol className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+            {[
+              ['1', 'Within a week', `The ${SITE.parent} team reviews your claim for “${problemTitle}” and gets in touch.`],
+              ['2', 'Validation sprint', 'Together we test the problem with the people who said they face it.'],
+              ['3', 'Studio', 'Strong claims join the studio: product, go-to-market and funding support.'],
+            ].map(([n, t, d]) => (
+              <li key={n} className="rounded-lg bg-paper2/60 p-3">
+                <p className="font-mono text-[10px] uppercase text-signal">Step {n} · {t}</p>
+                <p className="mt-1 text-ink2">{d}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 text-sm text-ink2">
+            Meanwhile, share this problem to rally more people who face it, and potential co-founders.{' '}
+            <Link href="/studio" className="font-semibold text-signal hover:underline">How the studio works →</Link>
           </p>
           {status.isPublic && (
             <p className="mt-2 text-sm text-ink2">
@@ -187,6 +202,7 @@ export default function BuildInterest({ problemId, problemTitle, initialCount })
           </form>
         )
       )}
+      {children ? <div className="border-t border-paper/15 bg-paper p-6 text-ink">{children}</div> : null}
     </section>
   );
 }
