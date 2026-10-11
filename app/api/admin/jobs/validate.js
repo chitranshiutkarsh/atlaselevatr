@@ -2,7 +2,7 @@ function text(value, max) {
   return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, max) : '';
 }
 
-export function cleanJob(body, sources) {
+export function cleanJob(body, sources, industries = []) {
   const title = text(body.title, 120);
   const company = text(body.company, 120);
   const location = text(body.location, 80) || null;
@@ -18,5 +18,7 @@ export function cleanJob(body, sources) {
   } catch {
     return { error: 'Paste the full apply link, starting with https://' };
   }
-  return { title, company, location, focus, source, url };
+  const industry = industries.includes(body.industry) ? body.industry : null;
+  const problemId = parseInt(body.problem_id, 10) || null;
+  return { title, company, location, focus, source, url, industry, problemId };
 }
