@@ -1,21 +1,22 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import VoteButton from '@/components/VoteButton';
 import Comments from '@/components/Comments';
 import BuildInterest from '@/components/BuildInterest';
 import ViewTracker from '@/components/ViewTracker';
 import SetupNotice from '@/components/SetupNotice';
-import ProofPanel from '@/components/ProofPanel';
+import FacePanel from '@/components/FacePanel';
 import StartupsSolving from '@/components/StartupsSolving';
 import BuildersList from '@/components/BuildersList';
-import ShareBar from '@/components/ShareBar';
 import DigestSignup from '@/components/DigestSignup';
-import { getProblem, listComments, getProofSummary, listPublicBuilders, getInviteForVisitor } from '@/lib/queries';
+import FollowProblem from '@/components/FollowProblem';
+import StageBadge from '@/components/StageBadge';
+import { getProblem, listComments, getProofSummary, listPublicBuilders, getInviteForVisitor, jobsForProblem } from '@/lib/queries';
 import { recommendStartups } from '@/lib/engine';
 import { getUser } from '@/lib/auth';
+import { getDigest } from '@/lib/digest';
 import { getVisitorId } from '@/lib/security';
 import { prettyName } from '@/lib/geo';
-import { SITE, VALIDATION } from '@/lib/constants';
+import { SITE } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -25,21 +26,26 @@ export async function generateMetadata({ params }) {
   if (!id) return {};
   try {
     const p = await getProblem(id);
-    return p ? { title: p.title, description: p.details || `A problem in ${prettyName(p.country)}. Vote and suggest how to solve it.` } : {};
+    return p ? { title: p.title, description: p.details || `A problem in ${prettyName(p.country)}. Do you face it too?` } : {};
   } catch {
     return {};
   }
 }
 
-export default async function ProblemPage({ params }) {
+// The problem page follows the Atlas loop, top to bottom:
+// do you face it (validate) → who's solving it (gap check) → build it (claim → studio) → how to solve it.
+export default async function ProblemPage({ params, searchParams }) {
   const id = parseInt(params.id, 10);
   if (!id) notFound();
+
   let problem;
   let comments;
   let proof;
   let builders;
   let invite;
   let user;
+  let jobs = [];
+  let digest = null;
   let startups = null;
   const visitor = getVisitorId();
   try {
@@ -53,16 +59,21 @@ export default async function ProblemPage({ params }) {
     ]);
     if (problem) {
       // The startup engine fills "Who's solving this" for every problem.
-      startups = await recommendStartups(problem, { limit: 6 }).catch((err) => {
-        console.error('startup engine failed', err);
-        return null;
-      });
+      [startups, jobs, digest] = await Promise.all([
+        recommendStartups(problem, { limit: 6 }).catch((err) => {
+          console.error('startup engine failed', err);
+          return null;
+        }),
+        jobsForProblem(problem).catch(() => []),
+        user ? getDigest(user.id).catch(() => null) : null,
+      ]);
     }
   } catch (err) {
     console.error(err);
     return <SetupNotice error={err.message} />;
   }
   if (!problem) notFound();
+
   // Dates aren't passed to client components; send ISO strings.
   const plainComments = comments.map((c) => ({ ...c, created_at: new Date(c.created_at).toISOString() }));
   const plainBuilders = builders.map(({ visitor_id, ...b }) => ({
@@ -71,71 +82,109 @@ export default async function ProblemPage({ params }) {
     created_at: new Date(b.created_at).toISOString(),
     updates: (b.updates || []).map((u) => ({ ...u, created_at: new Date(u.created_at).toISOString() })),
   }));
-  const validated = proof.total >= VALIDATION.proofs && (problem.builders || 0) >= VALIDATION.builders;
+  const isNew = searchParams?.new === '1';
+  const subscribed = Boolean(digest?.active);
 
   return (
     <div className="mx-auto max-w-3xl pt-10">
       <ViewTracker id={problem.id} />
-      <Link href="/problems" className="label hover:text-ink">← Leaderboard</Link>
-      <div className="mt-4 flex gap-4">
-        <VoteButton id={problem.id} votes={problem.votes} />
-        <div className="min-w-0">
-          <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{problem.title}</h1>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-wide text-ink2">
+      <Link href="/problems" className="label hover:text-ink">← All problems</Link>
+
+      {isNew && (
+        <div className="card mt-4 border-moss bg-moss/5 p-5">
+          <p className="label text-moss">Live now</p>
+          <p className="mt-1 font-display text-2xl font-semibold">Your problem is on the map.</p>
+          <p className="mt-1 text-sm text-ink2">
+            Below: who&apos;s already working on it. Next step: get people who face it to say so. Ten first-hand stories
+            validate it for founders.
+          </p>
+          {searchParams?.following !== '1' && (
+            <div className="mt-3">
+              <FollowProblem problemId={problem.id} email={user?.email || ''} />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <StageBadge problem={problem} />
+          <span className="font-mono text-[11px] uppercase tracking-wide text-ink2">
             {problem.industry} · {prettyName(problem.country)}
             {problem.author ? ` · raised by ${problem.author}` : ''}
             {` · 👁 ${(problem.views || 0).toLocaleString('en-IN')} views`}
-          </p>
-          {validated && (
-            <span className="mt-2 inline-flex rounded-full bg-moss px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-white">
-              ✓ Validated problem
-            </span>
-          )}
+          </span>
         </div>
+        <h1 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{problem.title}</h1>
+        {problem.details && <p className="mt-4 text-lg text-ink2">{problem.details}</p>}
+        {problem.source && (
+          <p className="mt-3 text-sm text-ink2">
+            Source:{' '}
+            {problem.source_url ? (
+              <a href={problem.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
+                {problem.source}
+              </a>
+            ) : (
+              problem.source
+            )}
+          </p>
+        )}
       </div>
 
-      {problem.details && <p className="mt-6 text-lg text-ink2">{problem.details}</p>}
-
-      {problem.source && (
-        <p className="mt-4 text-sm text-ink2">
-          Source:{' '}
-          {problem.source_url ? (
-            <a href={problem.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
-              {problem.source}
-            </a>
-          ) : (
-            problem.source
-          )}
-        </p>
-      )}
-
-      {problem.solution && (
-        <div className="card mt-6 p-5">
-          <p className="label">How the person who raised it would solve it</p>
-          <p className="mt-2">{problem.solution}</p>
-        </div>
-      )}
-
-      <ShareBar
-        url={`${SITE.url}/problems/${problem.id}`}
-        title={problem.title}
-        faced={Math.max(proof.total, problem.votes)}
-        refCode={invite?.code || null}
+      {/* 1. Validate: one action, optional story, then share */}
+      <FacePanel
+        problemId={problem.id}
+        votes={problem.votes}
+        initial={proof}
+        share={{ url: `${SITE.url}/problems/${problem.id}`, title: problem.title, refCode: invite?.code || null }}
       />
 
-      <ProofPanel problemId={problem.id} initial={proof} builders={problem.builders || 0} />
-
+      {/* 2. Gap check */}
       {startups && <StartupsSolving problem={problem} result={startups} />}
 
-      <BuildInterest problemId={problem.id} problemTitle={problem.title} initialCount={problem.builders || 0} />
+      {/* 3. Claim → studio, with the builders already on it */}
+      <BuildInterest problemId={problem.id} problemTitle={problem.title} initialCount={problem.builders || 0}>
+        {plainBuilders.length > 0 ? <BuildersList initial={plainBuilders} embedded /> : null}
+      </BuildInterest>
 
-      <BuildersList initial={plainBuilders} />
+      {jobs.length > 0 && (
+        <section className="mt-10">
+          <p className="label">Get paid to work on this</p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {jobs.map((j) => (
+              <li key={j.id} className="card flex items-start justify-between gap-3 p-4">
+                <div className="min-w-0">
+                  <p className="font-semibold leading-snug">{j.title}</p>
+                  <p className="text-sm text-ink2">{j.company}{j.location ? ` · ${j.location}` : ''}</p>
+                </div>
+                <a href={j.url} target="_blank" rel="noopener noreferrer" className="btn-ghost shrink-0 px-3 py-1.5 text-xs">Apply ↗</a>
+              </li>
+            ))}
+          </ul>
+          <Link href={`/jobs?industry=${encodeURIComponent(problem.industry)}`} className="mt-2 inline-block text-sm font-semibold text-signal hover:underline">
+            More {problem.industry} roles →
+          </Link>
+        </section>
+      )}
 
-      <Comments problemId={problem.id} initial={plainComments} />
+      {/* 4. How to solve it */}
+      <Comments
+        problemId={problem.id}
+        initial={plainComments}
+        raiser={problem.solution ? { solution: problem.solution, author: problem.author } : null}
+      />
 
-      <div className="mt-10">
-        <DigestSignup defaultCountry={problem.country} defaultIndustry={problem.industry} email={user?.email || ''} />
-      </div>
+      {!isNew && (
+        <div className="card mt-8 p-4">
+          <FollowProblem problemId={problem.id} email={user?.email || ''} following={searchParams?.follow === 'on'} />
+        </div>
+      )}
+
+      {!subscribed && (
+        <div className="mt-6">
+          <DigestSignup compact defaultCountry={problem.country} defaultIndustry={problem.industry} email={user?.email || ''} />
+        </div>
+      )}
     </div>
   );
 }
