@@ -17,6 +17,14 @@ The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
 - **Claims and Builders board** (`/builders`): "Want to build this?" can be made public. Public builders get a card (first name, city, stage, needs, headline; never contact details), post progress updates from the same browser, and others ask for an intro (handled by the team in `/admin` → Intro requests). Setting a lead to "in studio" shows a studio-pick badge.
 - **Share cards**: each problem has a generated image (`opengraph-image.js`) and WhatsApp / LinkedIn / X / copy buttons. Links carry the sharer's invite code.
 - **Sign-in and weekly digest**: email magic links (no passwords) at `/signin`, a "My Atlas" page at `/me`, and a weekly email of top problems, new problems and gaps for a chosen country and industries, sent every Monday 9:00 IST by Vercel Cron (`vercel.json`). Needs `RESEND_API_KEY`, `EMAIL_FROM` and `CRON_SECRET`.
+- **v3 flow (one loop)**: Face it → Validate → Gap check → Raise → Claim → Studio.
+  - **I face this** is the single action on a problem: it counts the person once (a vote) and then offers an optional one-line story (proof). The old separate vote and "This happens to me" buttons are merged (`components/FacePanel.jsx`).
+  - **Problems** (`/problems`) has tabs: Most faced · Gaps (no one building) · Newest · Discover, plus search and a country filter. `/gaps` and `/builders` redirect.
+  - **Stages** on every card: Open → Validated (10 stories) → Claimed (a builder) → In studio (`problemStage` in `lib/constants.js`).
+  - **Duplicate check**: Add a problem shows similar live problems as you type (`/api/problems/similar`).
+  - **Follow a problem** by email: people hear when someone claims it or suggests a fix (`lib/follow.js`, needs `RESEND_API_KEY`).
+  - **Studio** (`/studio`): how the loop works, biggest gaps, what builders get, and the builders board.
+  - One startup form for the directory and for problem pages; the raiser's idea is pinned in the solutions thread; jobs can be tagged to an industry or problem and show on problem pages; sign-in can also switch on the weekly digest; the invite card lives in My Atlas.
 - **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns.
 
 Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed on Vercel.
