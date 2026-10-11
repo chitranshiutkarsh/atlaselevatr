@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import MySettings from '@/components/MySettings';
+import InviteCard from '@/components/InviteCard';
+import { getInviteForVisitor } from '@/lib/queries';
+import { getVisitorId } from '@/lib/security';
+import { SITE } from '@/lib/constants';
 import SetupNotice from '@/components/SetupNotice';
 import { db } from '@/lib/db';
 import { getUser } from '@/lib/auth';
@@ -17,6 +21,7 @@ export default async function MePage({ searchParams }) {
   let claims;
   let votes;
   let digest;
+  let invite = null;
   try {
     user = await getUser();
     if (user) {
@@ -34,6 +39,7 @@ export default async function MePage({ searchParams }) {
         sql`SELECT count(*)::int AS votes FROM votes WHERE user_id = ${user.id}`,
         getDigest(user.id),
       ]);
+      invite = await getInviteForVisitor(getVisitorId()).catch(() => null);
     }
   } catch (err) {
     console.error(err);
@@ -68,7 +74,7 @@ export default async function MePage({ searchParams }) {
             <h2 className="font-display text-2xl font-semibold">Problems I&apos;m building</h2>
             {claims.length === 0 ? (
               <p className="mt-2 text-ink2">
-                None yet. <Link href="/gaps" className="font-semibold text-signal hover:underline">Find a gap to claim →</Link>
+                None yet. <Link href="/problems?view=gaps" className="font-semibold text-signal hover:underline">Find a gap to claim →</Link>
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
@@ -88,7 +94,7 @@ export default async function MePage({ searchParams }) {
             <h2 className="font-display text-2xl font-semibold">Problems I face</h2>
             {stories.length === 0 ? (
               <p className="mt-2 text-ink2">
-                Tap “This happens to me” on any problem you face. <Link href="/problems" className="font-semibold text-signal hover:underline">Browse problems →</Link>
+                Tap “I face this” on any problem you have, then add a one-line story. <Link href="/problems" className="font-semibold text-signal hover:underline">Browse problems →</Link>
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
@@ -106,8 +112,12 @@ export default async function MePage({ searchParams }) {
           </section>
         </div>
 
-        <aside>
+        <aside className="space-y-6">
           <MySettings digest={digest} />
+          <div>
+            <p className="label mb-2">Bring your people in</p>
+            <InviteCard initial={invite} siteUrl={SITE.url} />
+          </div>
         </aside>
       </div>
     </div>
