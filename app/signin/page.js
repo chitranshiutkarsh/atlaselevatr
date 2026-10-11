@@ -21,7 +21,7 @@ export default function SignInPage({ searchParams }) {
         <p className="label">No password needed</p>
         <h1 className="mt-2 font-display text-3xl font-semibold">Sign in to Atlas</h1>
         <p className="mt-2 text-ink2">
-          Keep your votes, stories and claims in one place, and get the weekly digest. Everything still works without
+          One email link signs you in and, if you like, signs you up for the weekly digest. Keep your votes, stories, claims and invite link in one place. Everything still works without
           signing in.
         </p>
         {error && <p className="mt-4 rounded-lg bg-signal/10 px-4 py-3 text-sm text-signal">{error}</p>}
