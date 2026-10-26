@@ -1,6 +1,6 @@
 # Atlas — atlaselevatr.in
 
-The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
+Find work on the problems you care about. The world's problems, the startups solving them, and their open roles. An Elevatr Ventures initiative.
 
 - **Atlas map**: World → continent → country. Each layer shows the unicorns, the problems they solved, problems people raised there, and every startup in that place by category.
 - **Startup directory** (`/startups`): ~9,700 startups: 4,000 Indian (including all 131 Indian unicorns) and 5,700 from other countries (Y Combinator companies and 1,000+ global unicorns). Filter by category, city and search. Founders can list their startup at `/startups/add` (reviewed in `/admin`).
@@ -26,6 +26,20 @@ The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
   - **Studio** (`/studio`): how the loop works, biggest gaps, what builders get, and the builders board.
   - One startup form for the directory and for problem pages; the raiser's idea is pinned in the solutions thread; jobs can be tagged to an industry or problem and show on problem pages; sign-in can also switch on the weekly digest; the invite card lives in My Atlas.
 - **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns.
+
+## Jobs on problems you care about (v9)
+
+The core of Atlas: **find work on the problems you care about.**
+
+- **I care about this** (♡): on every problem and on `/jobs`. No sign-in needed (visitor cookie); signed-in people keep it across devices. Stored in `cares`; counted on `problems.cares`.
+- **Roles come from the startups mapped to problems.** The startup engine stores each problem's matched startups in `problem_matches`. For those startups (and unicorns), `lib/careers.js` looks for a public careers board on **Greenhouse, Lever, Ashby or SmartRecruiters** by trying board names made from the startup's name, and keeps a board only when it checks out (`verifyBoard` in `lib/careers-core.js`: the board names the company *and* its roles are in the company's country). Half-matches go to `/admin` → Careers for review. Recruitee boards and any other careers link can be added by hand.
+- **Daily import** (`/api/cron/jobs`, Vercel Cron 01:00 UTC, needs `CRON_SECRET`): re-reads every verified board, closes filled roles, and checks more startups. The jobs and home pages also nudge `/api/jobs/refresh` in the background (does work at most every 10 minutes, one run at a time).
+- **Jobs page** (`/jobs`): *For you* (roles at startups working on the problems you care about, with a picker when you have none) and *All roles*; filters for role type, country, remote, area and search; `?problem=ID` and `?company=ID` focus views. Each role shows the problem its startup works on.
+- **Problem pages**: "Work on this problem": open roles at the startups solving it, join a builder, or start it yourself.
+- **Startups add their own careers page** at `/hiring`. Boards that check out go live at once; others wait for review.
+- **Admin** → Careers: approve or reject boards, add a careers link (live at once), run the import now.
+- **Weekly email** gains "New roles on problems you care about".
+- Hand-picked jobs (the old 50-job board) still work and show under "Hand-picked" on `/jobs`.
 
 Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed on Vercel.
 

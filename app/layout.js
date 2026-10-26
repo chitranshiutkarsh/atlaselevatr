@@ -12,10 +12,10 @@ const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', displ
 export const metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — the world's problems, mapped | ${SITE.parent}`,
+    default: `${SITE.name} — work on the problems you care about | ${SITE.parent}`,
     template: `%s · ${SITE.name}`,
   },
-  description: `${SITE.tagline} Explore what unicorns solved on every continent, add the problems you see, vote on what matters, and find problem-solving jobs. An ${SITE.parent} initiative.`,
+  description: `${SITE.tagline} Atlas maps the problems people face and the startups solving them, with the open roles at each. Pick the problems that matter to you and apply. An ${SITE.parent} initiative.`,
   openGraph: {
     title: `${SITE.name} by ${SITE.parent}`,
     description: SITE.tagline,

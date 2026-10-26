@@ -10,9 +10,12 @@ import BuildersList from '@/components/BuildersList';
 import DigestSignup from '@/components/DigestSignup';
 import FollowProblem from '@/components/FollowProblem';
 import StageBadge from '@/components/StageBadge';
+import CareButton from '@/components/CareButton';
+import WorkOnThis from '@/components/WorkOnThis';
 import { getProblem, listComments, getProofSummary, listPublicBuilders, getInviteForVisitor, jobsForProblem } from '@/lib/queries';
 import { recommendStartups } from '@/lib/engine';
-import { getUser } from '@/lib/auth';
+import { getUser, getUserId } from '@/lib/auth';
+import { caredProblemIds, rolesForProblem } from '@/lib/roles';
 import { getDigest } from '@/lib/digest';
 import { getVisitorId } from '@/lib/security';
 import { prettyName } from '@/lib/geo';
@@ -47,6 +50,8 @@ export default async function ProblemPage({ params, searchParams }) {
   let jobs = [];
   let digest = null;
   let startups = null;
+  let work = { roles: [], total: 0, companies: 0, careerLinks: [] };
+  let cared = [];
   const visitor = getVisitorId();
   try {
     [problem, comments, proof, builders, invite, user] = await Promise.all([
@@ -59,14 +64,20 @@ export default async function ProblemPage({ params, searchParams }) {
     ]);
     if (problem) {
       // The startup engine fills "Who's solving this" for every problem.
-      [startups, jobs, digest] = await Promise.all([
+      [startups, jobs, digest, cared] = await Promise.all([
         recommendStartups(problem, { limit: 6 }).catch((err) => {
           console.error('startup engine failed', err);
           return null;
         }),
-        jobsForProblem(problem).catch(() => []),
+        jobsForProblem(problem, 4).catch(() => []),
         user ? getDigest(user.id).catch(() => null) : null,
+        caredProblemIds({ visitorId: visitor, userId: getUserId() }).catch(() => []),
       ]);
+      // After the engine has stored this problem's matches, read the roles at those startups.
+      work = await rolesForProblem(problem.id, { limit: 6 }).catch((err) => {
+        console.error('roles for problem failed', err);
+        return work;
+      });
     }
   } catch (err) {
     console.error(err);
@@ -116,6 +127,9 @@ export default async function ProblemPage({ params, searchParams }) {
           </span>
         </div>
         <h1 className="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{problem.title}</h1>
+        <div className="mt-4">
+          <CareButton problemId={problem.id} initialCared={cared.includes(problem.id)} initialCount={problem.cares || 0} />
+        </div>
         {problem.details && <p className="mt-4 text-lg text-ink2">{problem.details}</p>}
         {problem.source && (
           <p className="mt-3 text-sm text-ink2">
@@ -142,32 +156,20 @@ export default async function ProblemPage({ params, searchParams }) {
       {/* 2. Gap check */}
       {startups && <StartupsSolving problem={problem} result={startups} />}
 
-      {/* 3. Claim → studio, with the builders already on it */}
+      {/* 3. Work on it: roles at the startups solving it, join a builder, or start it */}
+      <WorkOnThis
+        problem={problem}
+        work={work}
+        curated={jobs.filter((j) => j.problem_id === problem.id)}
+        builders={plainBuilders.length}
+      />
+
+      {/* 4. Claim → studio, with the builders already on it */}
       <BuildInterest problemId={problem.id} problemTitle={problem.title} initialCount={problem.builders || 0}>
         {plainBuilders.length > 0 ? <BuildersList initial={plainBuilders} embedded /> : null}
       </BuildInterest>
 
-      {jobs.length > 0 && (
-        <section className="mt-10">
-          <p className="label">Get paid to work on this</p>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {jobs.map((j) => (
-              <li key={j.id} className="card flex items-start justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <p className="font-semibold leading-snug">{j.title}</p>
-                  <p className="text-sm text-ink2">{j.company}{j.location ? ` · ${j.location}` : ''}</p>
-                </div>
-                <a href={j.url} target="_blank" rel="noopener noreferrer" className="btn-ghost shrink-0 px-3 py-1.5 text-xs">Apply ↗</a>
-              </li>
-            ))}
-          </ul>
-          <Link href={`/jobs?industry=${encodeURIComponent(problem.industry)}`} className="mt-2 inline-block text-sm font-semibold text-signal hover:underline">
-            More {problem.industry} roles →
-          </Link>
-        </section>
-      )}
-
-      {/* 4. How to solve it */}
+      {/* 5. How to solve it */}
       <Comments
         problemId={problem.id}
         initial={plainComments}

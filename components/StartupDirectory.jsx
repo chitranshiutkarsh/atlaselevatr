@@ -164,6 +164,11 @@ export default function StartupDirectory({
               <span className="shrink-0 font-mono text-[10px] uppercase text-ink2">{c.industry}</span>
             </div>
             <p className="mt-1 line-clamp-3 text-sm text-ink2">{c.problem}</p>
+            {c.open_roles > 0 && (
+              <a href={`/jobs?company=${c.id}`} className="mt-1.5 inline-block text-xs font-semibold text-moss hover:underline">
+                Hiring · {c.open_roles} open role{c.open_roles === 1 ? '' : 's'} →
+              </a>
+            )}
             <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink2/80">
               {[c.city || (c.country !== 'India' ? prettyName(c.country) : null), c.sector, c.last_funded ? `funded ${c.last_funded}` : null]
                 .filter(Boolean)

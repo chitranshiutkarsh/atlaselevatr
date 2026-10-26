@@ -10,6 +10,7 @@ import { db } from '@/lib/db';
 import { getUser } from '@/lib/auth';
 import { getDigest } from '@/lib/digest';
 import { VALIDATION } from '@/lib/constants';
+import { caredProblemIds, listCaredProblems } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -22,6 +23,7 @@ export default async function MePage({ searchParams }) {
   let votes;
   let digest;
   let invite = null;
+  let caredList = [];
   try {
     user = await getUser();
     if (user) {
@@ -40,6 +42,8 @@ export default async function MePage({ searchParams }) {
         getDigest(user.id),
       ]);
       invite = await getInviteForVisitor(getVisitorId()).catch(() => null);
+      const ids = await caredProblemIds({ visitorId: getVisitorId(), userId: user.id }).catch(() => []);
+      caredList = await listCaredProblems(ids).catch(() => []);
     }
   } catch (err) {
     console.error(err);
@@ -69,6 +73,30 @@ export default async function MePage({ searchParams }) {
               </div>
             ))}
           </div>
+
+          <section>
+            <h2 className="font-display text-2xl font-semibold">Problems I care about</h2>
+            {caredList.length === 0 ? (
+              <p className="mt-2 text-ink2">
+                Tap ♡ on the problems you want to work on, and see roles at the startups solving them.{' '}
+                <Link href="/jobs?tab=for-you" className="font-semibold text-signal hover:underline">Pick problems →</Link>
+              </p>
+            ) : (
+              <>
+                <ul className="mt-3 space-y-2">
+                  {caredList.map((p) => (
+                    <li key={p.id} className="card flex flex-wrap items-center justify-between gap-2 p-4">
+                      <Link href={`/problems/${p.id}`} className="font-semibold hover:text-signal">♥ {p.title}</Link>
+                      <Link href={`/jobs?problem=${p.id}`} className="font-mono text-[11px] uppercase text-ink2 hover:text-signal">
+                        {p.roles} open role{p.roles === 1 ? '' : 's'} →
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/jobs" className="mt-2 inline-block text-sm font-semibold text-signal hover:underline">See roles for you →</Link>
+              </>
+            )}
+          </section>
 
           <section>
             <h2 className="font-display text-2xl font-semibold">Problems I&apos;m building</h2>

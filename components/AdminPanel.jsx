@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS, LEAD_STATUSES, BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
 import CsvImport from './CsvImport';
+import AdminCareers from './AdminCareers';
 
 async function call(url, method, body) {
   const res = await fetch(url, {
@@ -20,7 +21,7 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '', industry: '', problem_id: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [] }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], careers = { review: [], live: [], stats: {} } }) {
   const router = useRouter();
   const newLeads = leads.filter((l) => l.status === 'new').length;
   const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
@@ -62,7 +63,8 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
     ['intros', `🤝 Intro requests (${intros.filter((i) => i.status === 'new').length} new)`],
     ['submissions', `Startup submissions (${submissions.length})`],
     ['proofs', `🙋 Stories (${proofs.length})`],
-    ['jobs', `Jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
+    ['careers', `💼 Careers (${careers.review.length} to review)`],
+    ['jobs', `Hand-picked jobs (${activeJobs}/${MAX_ACTIVE_JOBS})`],
     ['problems', `Problems (${problems.length})`],
     ['comments', `Comments (${comments.length})`],
     ['companies', `Startups (${companyTotal.toLocaleString('en-IN')})`],
@@ -87,6 +89,8 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
         ))}
       </div>
       {msg && <p className="mt-4 rounded-lg bg-paper2 px-4 py-2 text-sm">{msg}</p>}
+
+      {tab === 'careers' && <AdminCareers review={careers.review} live={careers.live} stats={careers.stats} />}
 
       {tab === 'jobs' && (
         <section className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
