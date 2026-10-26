@@ -3,6 +3,7 @@ import AdminPanel from '@/components/AdminPanel';
 import SetupNotice from '@/components/SetupNotice';
 import { db } from '@/lib/db';
 import { listJobs } from '@/lib/queries';
+import { jobsStats } from '@/lib/roles';
 import { isAdmin, adminConfigured } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
@@ -43,11 +44,25 @@ export default async function AdminPage() {
         FROM intro_requests i JOIN builder_interests b ON b.id = i.builder_id JOIN problems p ON p.id = b.problem_id
         ORDER BY (i.status = 'new') DESC, i.created_at DESC LIMIT 200`,
     ]);
+    const [review, live, cstats, [lastRun]] = await Promise.all([
+      sql`SELECT b.company_id, b.ats, b.token, b.status, b.source, b.board_name, b.evidence, b.submitter, b.open_roles, b.last_error,
+          c.name, c.country
+        FROM careers_boards b JOIN companies c ON c.id = b.company_id
+        WHERE b.status IN ('review', 'broken') ORDER BY b.updated_at DESC LIMIT 300`,
+      sql`SELECT b.company_id, b.ats, b.token, b.status, b.source, b.board_name, b.evidence, b.submitter, b.open_roles, b.last_error,
+          c.name, c.country
+        FROM careers_boards b JOIN companies c ON c.id = b.company_id
+        WHERE b.status = 'verified' ORDER BY b.open_roles DESC, c.name LIMIT 300`,
+      jobsStats(),
+      sql`SELECT value FROM meta WHERE key = 'jobs_last_run'`,
+    ]);
+    const careers = { review, live, stats: { ...cstats, last_run: lastRun?.value || null } };
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
     return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} submissions={submissions} comments={comments}
         leads={leads.map((l) => ({ ...l, created_at: new Date(l.created_at).toISOString() }))}
         proofs={proofs}
+        careers={careers}
         intros={intros.map((i) => ({ ...i, created_at: new Date(i.created_at).toISOString() }))}
       />;
   } catch (err) {
