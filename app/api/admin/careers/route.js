@@ -13,7 +13,7 @@ export async function POST(request) {
 
   if (body.run) {
     try {
-      return Response.json(await runJobsRefresh({ budgetMs: 240000, discover: 400 }));
+      return Response.json(await runJobsRefresh({ budgetMs: 240000, discover: 400, matchMax: 200 }));
     } catch (err) {
       console.error(err);
       return jsonError('The import failed. Check the logs.', 500);
