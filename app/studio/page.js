@@ -57,13 +57,13 @@ const JOURNEY = [
     when: '2025',
     role: "Senior Manager, CEO's Office",
     org: 'DSCI (NASSCOM)',
-    note: "Chief of Staff to the CEO; built India's first Cyber GCC Summit.",
+    note: 'Chief of Staff to the CEO, running strategy, planning and special initiatives.',
   },
   {
     when: '2026 – now',
     role: 'CEO',
     org: 'Savart',
-    note: 'Joined the wealthtech company as Entrepreneur in Residence and was appointed CEO.',
+    note: 'Leading Savart, a wealthtech helping everyday investors in India build stock and mutual fund portfolios that fit their needs and temperament, backed by research and AI recommendations.',
     now: true,
   },
 ];
