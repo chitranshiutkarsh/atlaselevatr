@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS, LEAD_STATUSES, BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS } from '@/lib/constants';
+import { INDUSTRIES, JOB_SOURCES, MAX_ACTIVE_JOBS, LEAD_STATUSES, BUILDER_STAGES, BUILDER_COMMITMENT, BUILDER_NEEDS, REPORT_REASONS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
 import CsvImport from './CsvImport';
 
@@ -20,10 +20,11 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '', industry: '', problem_id: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [] }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], reports = [] }) {
   const router = useRouter();
   const newLeads = leads.filter((l) => l.status === 'new').length;
-  const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
+  const openReports = reports.filter((r) => r.status === 'new').length;
+  const [tab, setTab] = useState(openReports ? 'reports' : newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
   const [leadFilter, setLeadFilter] = useState('all');
   const [noteDraft, setNoteDraft] = useState({});
   const [job, setJob] = useState(EMPTY_JOB);
@@ -58,6 +59,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
   }
 
   const tabs = [
+    ['reports', `🚩 Reports (${openReports} open)`],
     ['leads', `🚀 Builders (${newLeads} new / ${leads.length})`],
     ['intros', `🤝 Intro requests (${intros.filter((i) => i.status === 'new').length} new)`],
     ['submissions', `Startup submissions (${submissions.length})`],
@@ -286,6 +288,51 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
               >
                 {['new', 'introduced', 'declined'].map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tab === 'reports' && (
+        <ul className="mt-6 space-y-2">
+          <li className="text-sm text-ink2">
+            Reports come from the phone app. Hide removes the item from Atlas; Keep closes the report and shows it again.
+            Items reported by several people are hidden automatically until you decide.
+          </li>
+          {reports.length === 0 && <li className="text-ink2">No reports.</li>}
+          {reports.map((r) => (
+            <li key={r.id} className={`card flex flex-wrap items-start justify-between gap-3 p-4 ${r.status === 'new' ? '' : 'opacity-50'}`}>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-xs text-ink2">
+                  {r.kind} · {REPORT_REASONS.find(([k]) => k === r.reason)?.[1] || r.reason} · {r.status}
+                  {r.problem_id && (
+                    <>
+                      {' '}· on{' '}
+                      <a href={`/problems/${r.problem_id}`} target="_blank" rel="noopener noreferrer" className="underline">{r.problem}</a>
+                    </>
+                  )}
+                </p>
+                <p className="mt-1 whitespace-pre-line text-sm">{r.content || '(deleted)'}</p>
+                {r.note && <p className="mt-1 text-xs text-ink2">Note: {r.note}</p>}
+              </div>
+              {r.status === 'new' && (
+                <div className="flex gap-2">
+                  <button
+                    className="chip hover:border-signal hover:text-signal"
+                    disabled={busy}
+                    onClick={() => run(() => call(`/api/admin/reports/${r.id}`, 'PATCH', { action: 'hide' }), 'Hidden.')}
+                  >
+                    Hide
+                  </button>
+                  <button
+                    className="chip"
+                    disabled={busy}
+                    onClick={() => run(() => call(`/api/admin/reports/${r.id}`, 'PATCH', { action: 'dismiss' }), 'Kept.')}
+                  >
+                    Keep
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Atlas",
+    "slug": "atlas-elevatr",
+    "scheme": "atlas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F4F1EA",
+    "description": "Every unsolved problem on Earth, mapped and ranked. Say which problems you face, see who is already solving them, and find the gaps worth building. By Elevatr Ventures.",
+    "ios": {
+      "bundleIdentifier": "in.atlaselevatr.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "in.atlaselevatr.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-mono.png",
+        "backgroundColor": "#14213D"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": []
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F4F1EA"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "https://atlaselevatr.in"
+    }
+  }
+}

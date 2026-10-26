@@ -1,0 +1,1150 @@
+{
+ "version": 1,
+ "site": {
+  "name": "Atlas",
+  "url": "https://atlaselevatr.in",
+  "parent": "Elevatr Ventures",
+  "tagline": "Every unsolved problem on Earth, mapped and ranked."
+ },
+ "industries": [
+  "Fintech",
+  "Health",
+  "Education",
+  "Climate & Energy",
+  "Mobility",
+  "Logistics",
+  "Commerce",
+  "Food & Agri",
+  "AI & Software",
+  "SaaS & B2B",
+  "HR & Work",
+  "Media & Creators",
+  "Gaming & Entertainment",
+  "Travel & Hospitality",
+  "Real Estate & Housing",
+  "Government & Civic",
+  "Other"
+ ],
+ "countries": [
+  {
+   "name": "Afghanistan",
+   "label": "Afghanistan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Albania",
+   "label": "Albania",
+   "continent": "Europe"
+  },
+  {
+   "name": "Algeria",
+   "label": "Algeria",
+   "continent": "Africa"
+  },
+  {
+   "name": "Angola",
+   "label": "Angola",
+   "continent": "Africa"
+  },
+  {
+   "name": "Argentina",
+   "label": "Argentina",
+   "continent": "South America"
+  },
+  {
+   "name": "Armenia",
+   "label": "Armenia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Australia",
+   "label": "Australia",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Austria",
+   "label": "Austria",
+   "continent": "Europe"
+  },
+  {
+   "name": "Azerbaijan",
+   "label": "Azerbaijan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Bahamas",
+   "label": "Bahamas",
+   "continent": "North America"
+  },
+  {
+   "name": "Bahrain",
+   "label": "Bahrain",
+   "continent": "Asia"
+  },
+  {
+   "name": "Bangladesh",
+   "label": "Bangladesh",
+   "continent": "Asia"
+  },
+  {
+   "name": "Belarus",
+   "label": "Belarus",
+   "continent": "Europe"
+  },
+  {
+   "name": "Belgium",
+   "label": "Belgium",
+   "continent": "Europe"
+  },
+  {
+   "name": "Belize",
+   "label": "Belize",
+   "continent": "North America"
+  },
+  {
+   "name": "Benin",
+   "label": "Benin",
+   "continent": "Africa"
+  },
+  {
+   "name": "Bhutan",
+   "label": "Bhutan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Bolivia",
+   "label": "Bolivia",
+   "continent": "South America"
+  },
+  {
+   "name": "Bosnia and Herz.",
+   "label": "Bosnia & Herzegovina",
+   "continent": "Europe"
+  },
+  {
+   "name": "Botswana",
+   "label": "Botswana",
+   "continent": "Africa"
+  },
+  {
+   "name": "Brazil",
+   "label": "Brazil",
+   "continent": "South America"
+  },
+  {
+   "name": "Brunei",
+   "label": "Brunei",
+   "continent": "Asia"
+  },
+  {
+   "name": "Bulgaria",
+   "label": "Bulgaria",
+   "continent": "Europe"
+  },
+  {
+   "name": "Burkina Faso",
+   "label": "Burkina Faso",
+   "continent": "Africa"
+  },
+  {
+   "name": "Burundi",
+   "label": "Burundi",
+   "continent": "Africa"
+  },
+  {
+   "name": "Cambodia",
+   "label": "Cambodia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Cameroon",
+   "label": "Cameroon",
+   "continent": "Africa"
+  },
+  {
+   "name": "Canada",
+   "label": "Canada",
+   "continent": "North America"
+  },
+  {
+   "name": "Central African Rep.",
+   "label": "Central African Republic",
+   "continent": "Africa"
+  },
+  {
+   "name": "Chad",
+   "label": "Chad",
+   "continent": "Africa"
+  },
+  {
+   "name": "Chile",
+   "label": "Chile",
+   "continent": "South America"
+  },
+  {
+   "name": "China",
+   "label": "China",
+   "continent": "Asia"
+  },
+  {
+   "name": "Colombia",
+   "label": "Colombia",
+   "continent": "South America"
+  },
+  {
+   "name": "Congo",
+   "label": "Congo",
+   "continent": "Africa"
+  },
+  {
+   "name": "Costa Rica",
+   "label": "Costa Rica",
+   "continent": "North America"
+  },
+  {
+   "name": "Côte d'Ivoire",
+   "label": "Côte d'Ivoire",
+   "continent": "Africa"
+  },
+  {
+   "name": "Croatia",
+   "label": "Croatia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Cuba",
+   "label": "Cuba",
+   "continent": "North America"
+  },
+  {
+   "name": "Cyprus",
+   "label": "Cyprus",
+   "continent": "Asia"
+  },
+  {
+   "name": "Czechia",
+   "label": "Czechia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Denmark",
+   "label": "Denmark",
+   "continent": "Europe"
+  },
+  {
+   "name": "Djibouti",
+   "label": "Djibouti",
+   "continent": "Africa"
+  },
+  {
+   "name": "Dominican Rep.",
+   "label": "Dominican Republic",
+   "continent": "North America"
+  },
+  {
+   "name": "Dem. Rep. Congo",
+   "label": "DR Congo",
+   "continent": "Africa"
+  },
+  {
+   "name": "Ecuador",
+   "label": "Ecuador",
+   "continent": "South America"
+  },
+  {
+   "name": "Egypt",
+   "label": "Egypt",
+   "continent": "Africa"
+  },
+  {
+   "name": "El Salvador",
+   "label": "El Salvador",
+   "continent": "North America"
+  },
+  {
+   "name": "Eq. Guinea",
+   "label": "Equatorial Guinea",
+   "continent": "Africa"
+  },
+  {
+   "name": "Eritrea",
+   "label": "Eritrea",
+   "continent": "Africa"
+  },
+  {
+   "name": "Estonia",
+   "label": "Estonia",
+   "continent": "Europe"
+  },
+  {
+   "name": "eSwatini",
+   "label": "Eswatini",
+   "continent": "Africa"
+  },
+  {
+   "name": "Ethiopia",
+   "label": "Ethiopia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Falkland Is.",
+   "label": "Falkland Islands",
+   "continent": "South America"
+  },
+  {
+   "name": "Fiji",
+   "label": "Fiji",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Finland",
+   "label": "Finland",
+   "continent": "Europe"
+  },
+  {
+   "name": "France",
+   "label": "France",
+   "continent": "Europe"
+  },
+  {
+   "name": "Gabon",
+   "label": "Gabon",
+   "continent": "Africa"
+  },
+  {
+   "name": "Gambia",
+   "label": "Gambia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Georgia",
+   "label": "Georgia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Germany",
+   "label": "Germany",
+   "continent": "Europe"
+  },
+  {
+   "name": "Ghana",
+   "label": "Ghana",
+   "continent": "Africa"
+  },
+  {
+   "name": "Greece",
+   "label": "Greece",
+   "continent": "Europe"
+  },
+  {
+   "name": "Greenland",
+   "label": "Greenland",
+   "continent": "North America"
+  },
+  {
+   "name": "Guatemala",
+   "label": "Guatemala",
+   "continent": "North America"
+  },
+  {
+   "name": "Guinea",
+   "label": "Guinea",
+   "continent": "Africa"
+  },
+  {
+   "name": "Guinea-Bissau",
+   "label": "Guinea-Bissau",
+   "continent": "Africa"
+  },
+  {
+   "name": "Guyana",
+   "label": "Guyana",
+   "continent": "South America"
+  },
+  {
+   "name": "Haiti",
+   "label": "Haiti",
+   "continent": "North America"
+  },
+  {
+   "name": "Honduras",
+   "label": "Honduras",
+   "continent": "North America"
+  },
+  {
+   "name": "Hong Kong",
+   "label": "Hong Kong",
+   "continent": "Asia"
+  },
+  {
+   "name": "Hungary",
+   "label": "Hungary",
+   "continent": "Europe"
+  },
+  {
+   "name": "Iceland",
+   "label": "Iceland",
+   "continent": "Europe"
+  },
+  {
+   "name": "India",
+   "label": "India",
+   "continent": "Asia"
+  },
+  {
+   "name": "Indonesia",
+   "label": "Indonesia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Iran",
+   "label": "Iran",
+   "continent": "Asia"
+  },
+  {
+   "name": "Iraq",
+   "label": "Iraq",
+   "continent": "Asia"
+  },
+  {
+   "name": "Ireland",
+   "label": "Ireland",
+   "continent": "Europe"
+  },
+  {
+   "name": "Israel",
+   "label": "Israel",
+   "continent": "Asia"
+  },
+  {
+   "name": "Italy",
+   "label": "Italy",
+   "continent": "Europe"
+  },
+  {
+   "name": "Jamaica",
+   "label": "Jamaica",
+   "continent": "North America"
+  },
+  {
+   "name": "Japan",
+   "label": "Japan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Jordan",
+   "label": "Jordan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Kazakhstan",
+   "label": "Kazakhstan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Kenya",
+   "label": "Kenya",
+   "continent": "Africa"
+  },
+  {
+   "name": "Kosovo",
+   "label": "Kosovo",
+   "continent": "Europe"
+  },
+  {
+   "name": "Kuwait",
+   "label": "Kuwait",
+   "continent": "Asia"
+  },
+  {
+   "name": "Kyrgyzstan",
+   "label": "Kyrgyzstan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Laos",
+   "label": "Laos",
+   "continent": "Asia"
+  },
+  {
+   "name": "Latvia",
+   "label": "Latvia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Lebanon",
+   "label": "Lebanon",
+   "continent": "Asia"
+  },
+  {
+   "name": "Lesotho",
+   "label": "Lesotho",
+   "continent": "Africa"
+  },
+  {
+   "name": "Liberia",
+   "label": "Liberia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Libya",
+   "label": "Libya",
+   "continent": "Africa"
+  },
+  {
+   "name": "Lithuania",
+   "label": "Lithuania",
+   "continent": "Europe"
+  },
+  {
+   "name": "Luxembourg",
+   "label": "Luxembourg",
+   "continent": "Europe"
+  },
+  {
+   "name": "Madagascar",
+   "label": "Madagascar",
+   "continent": "Africa"
+  },
+  {
+   "name": "Malawi",
+   "label": "Malawi",
+   "continent": "Africa"
+  },
+  {
+   "name": "Malaysia",
+   "label": "Malaysia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Maldives",
+   "label": "Maldives",
+   "continent": "Asia"
+  },
+  {
+   "name": "Mali",
+   "label": "Mali",
+   "continent": "Africa"
+  },
+  {
+   "name": "Malta",
+   "label": "Malta",
+   "continent": "Europe"
+  },
+  {
+   "name": "Mauritania",
+   "label": "Mauritania",
+   "continent": "Africa"
+  },
+  {
+   "name": "Mauritius",
+   "label": "Mauritius",
+   "continent": "Africa"
+  },
+  {
+   "name": "Mexico",
+   "label": "Mexico",
+   "continent": "North America"
+  },
+  {
+   "name": "Moldova",
+   "label": "Moldova",
+   "continent": "Europe"
+  },
+  {
+   "name": "Mongolia",
+   "label": "Mongolia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Montenegro",
+   "label": "Montenegro",
+   "continent": "Europe"
+  },
+  {
+   "name": "Morocco",
+   "label": "Morocco",
+   "continent": "Africa"
+  },
+  {
+   "name": "Mozambique",
+   "label": "Mozambique",
+   "continent": "Africa"
+  },
+  {
+   "name": "Myanmar",
+   "label": "Myanmar",
+   "continent": "Asia"
+  },
+  {
+   "name": "Namibia",
+   "label": "Namibia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Nepal",
+   "label": "Nepal",
+   "continent": "Asia"
+  },
+  {
+   "name": "Netherlands",
+   "label": "Netherlands",
+   "continent": "Europe"
+  },
+  {
+   "name": "New Caledonia",
+   "label": "New Caledonia",
+   "continent": "Oceania"
+  },
+  {
+   "name": "New Zealand",
+   "label": "New Zealand",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Nicaragua",
+   "label": "Nicaragua",
+   "continent": "North America"
+  },
+  {
+   "name": "Niger",
+   "label": "Niger",
+   "continent": "Africa"
+  },
+  {
+   "name": "Nigeria",
+   "label": "Nigeria",
+   "continent": "Africa"
+  },
+  {
+   "name": "North Korea",
+   "label": "North Korea",
+   "continent": "Asia"
+  },
+  {
+   "name": "Macedonia",
+   "label": "North Macedonia",
+   "continent": "Europe"
+  },
+  {
+   "name": "N. Cyprus",
+   "label": "Northern Cyprus",
+   "continent": "Asia"
+  },
+  {
+   "name": "Norway",
+   "label": "Norway",
+   "continent": "Europe"
+  },
+  {
+   "name": "Oman",
+   "label": "Oman",
+   "continent": "Asia"
+  },
+  {
+   "name": "Pakistan",
+   "label": "Pakistan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Palestine",
+   "label": "Palestine",
+   "continent": "Asia"
+  },
+  {
+   "name": "Panama",
+   "label": "Panama",
+   "continent": "North America"
+  },
+  {
+   "name": "Papua New Guinea",
+   "label": "Papua New Guinea",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Paraguay",
+   "label": "Paraguay",
+   "continent": "South America"
+  },
+  {
+   "name": "Peru",
+   "label": "Peru",
+   "continent": "South America"
+  },
+  {
+   "name": "Philippines",
+   "label": "Philippines",
+   "continent": "Asia"
+  },
+  {
+   "name": "Poland",
+   "label": "Poland",
+   "continent": "Europe"
+  },
+  {
+   "name": "Portugal",
+   "label": "Portugal",
+   "continent": "Europe"
+  },
+  {
+   "name": "Puerto Rico",
+   "label": "Puerto Rico",
+   "continent": "North America"
+  },
+  {
+   "name": "Qatar",
+   "label": "Qatar",
+   "continent": "Asia"
+  },
+  {
+   "name": "Romania",
+   "label": "Romania",
+   "continent": "Europe"
+  },
+  {
+   "name": "Russia",
+   "label": "Russia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Rwanda",
+   "label": "Rwanda",
+   "continent": "Africa"
+  },
+  {
+   "name": "Saudi Arabia",
+   "label": "Saudi Arabia",
+   "continent": "Asia"
+  },
+  {
+   "name": "Senegal",
+   "label": "Senegal",
+   "continent": "Africa"
+  },
+  {
+   "name": "Serbia",
+   "label": "Serbia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Sierra Leone",
+   "label": "Sierra Leone",
+   "continent": "Africa"
+  },
+  {
+   "name": "Singapore",
+   "label": "Singapore",
+   "continent": "Asia"
+  },
+  {
+   "name": "Slovakia",
+   "label": "Slovakia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Slovenia",
+   "label": "Slovenia",
+   "continent": "Europe"
+  },
+  {
+   "name": "Solomon Is.",
+   "label": "Solomon Islands",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Somalia",
+   "label": "Somalia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Somaliland",
+   "label": "Somaliland",
+   "continent": "Africa"
+  },
+  {
+   "name": "South Africa",
+   "label": "South Africa",
+   "continent": "Africa"
+  },
+  {
+   "name": "South Korea",
+   "label": "South Korea",
+   "continent": "Asia"
+  },
+  {
+   "name": "S. Sudan",
+   "label": "South Sudan",
+   "continent": "Africa"
+  },
+  {
+   "name": "Spain",
+   "label": "Spain",
+   "continent": "Europe"
+  },
+  {
+   "name": "Sri Lanka",
+   "label": "Sri Lanka",
+   "continent": "Asia"
+  },
+  {
+   "name": "Sudan",
+   "label": "Sudan",
+   "continent": "Africa"
+  },
+  {
+   "name": "Suriname",
+   "label": "Suriname",
+   "continent": "South America"
+  },
+  {
+   "name": "Sweden",
+   "label": "Sweden",
+   "continent": "Europe"
+  },
+  {
+   "name": "Switzerland",
+   "label": "Switzerland",
+   "continent": "Europe"
+  },
+  {
+   "name": "Syria",
+   "label": "Syria",
+   "continent": "Asia"
+  },
+  {
+   "name": "Taiwan",
+   "label": "Taiwan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Tajikistan",
+   "label": "Tajikistan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Tanzania",
+   "label": "Tanzania",
+   "continent": "Africa"
+  },
+  {
+   "name": "Thailand",
+   "label": "Thailand",
+   "continent": "Asia"
+  },
+  {
+   "name": "Timor-Leste",
+   "label": "Timor-Leste",
+   "continent": "Asia"
+  },
+  {
+   "name": "Togo",
+   "label": "Togo",
+   "continent": "Africa"
+  },
+  {
+   "name": "Trinidad and Tobago",
+   "label": "Trinidad and Tobago",
+   "continent": "North America"
+  },
+  {
+   "name": "Tunisia",
+   "label": "Tunisia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Turkey",
+   "label": "Turkey",
+   "continent": "Asia"
+  },
+  {
+   "name": "Turkmenistan",
+   "label": "Turkmenistan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Uganda",
+   "label": "Uganda",
+   "continent": "Africa"
+  },
+  {
+   "name": "Ukraine",
+   "label": "Ukraine",
+   "continent": "Europe"
+  },
+  {
+   "name": "United Arab Emirates",
+   "label": "United Arab Emirates",
+   "continent": "Asia"
+  },
+  {
+   "name": "United Kingdom",
+   "label": "United Kingdom",
+   "continent": "Europe"
+  },
+  {
+   "name": "United States of America",
+   "label": "United States",
+   "continent": "North America"
+  },
+  {
+   "name": "Uruguay",
+   "label": "Uruguay",
+   "continent": "South America"
+  },
+  {
+   "name": "Uzbekistan",
+   "label": "Uzbekistan",
+   "continent": "Asia"
+  },
+  {
+   "name": "Vanuatu",
+   "label": "Vanuatu",
+   "continent": "Oceania"
+  },
+  {
+   "name": "Venezuela",
+   "label": "Venezuela",
+   "continent": "South America"
+  },
+  {
+   "name": "Vietnam",
+   "label": "Vietnam",
+   "continent": "Asia"
+  },
+  {
+   "name": "W. Sahara",
+   "label": "Western Sahara",
+   "continent": "Africa"
+  },
+  {
+   "name": "Yemen",
+   "label": "Yemen",
+   "continent": "Asia"
+  },
+  {
+   "name": "Zambia",
+   "label": "Zambia",
+   "continent": "Africa"
+  },
+  {
+   "name": "Zimbabwe",
+   "label": "Zimbabwe",
+   "continent": "Africa"
+  }
+ ],
+ "continents": [
+  {
+   "name": "Asia",
+   "slug": "asia"
+  },
+  {
+   "name": "Europe",
+   "slug": "europe"
+  },
+  {
+   "name": "Africa",
+   "slug": "africa"
+  },
+  {
+   "name": "North America",
+   "slug": "north-america"
+  },
+  {
+   "name": "South America",
+   "slug": "south-america"
+  },
+  {
+   "name": "Oceania",
+   "slug": "oceania"
+  }
+ ],
+ "limits": {
+  "titleMin": 8,
+  "titleMax": 140,
+  "detailsMax": 1000,
+  "solutionMin": 10,
+  "solutionMax": 1000,
+  "nameMax": 60,
+  "submissionsPerHour": 5,
+  "invitesPerHour": 5,
+  "votesPerIpPerProblem": 10
+ },
+ "validation": {
+  "proofs": 10,
+  "builders": 1
+ },
+ "stages": {
+  "open": {
+   "label": "Open",
+   "tone": "open",
+   "hint": "People face it. Not enough stories to validate yet."
+  },
+  "validated": {
+   "label": "Validated",
+   "tone": "validated",
+   "hint": "10+ first-hand stories. Ready for a builder."
+  },
+  "claimed": {
+   "label": "Claimed",
+   "tone": "claimed",
+   "hint": "Someone is building it."
+  },
+  "studio": {
+   "label": "In studio",
+   "tone": "studio",
+   "hint": "Backed by the venture studio."
+  }
+ },
+ "builder": {
+  "stages": [
+   [
+    "idea",
+    "Just an idea"
+   ],
+   [
+    "researching",
+    "Talking to users"
+   ],
+   [
+    "prototype",
+    "Building a prototype"
+   ],
+   [
+    "launched",
+    "Launched, early users"
+   ],
+   [
+    "revenue",
+    "Making revenue"
+   ]
+  ],
+  "commitment": [
+   [
+    "full-time",
+    "Full-time"
+   ],
+   [
+    "part-time",
+    "Part-time / nights & weekends"
+   ],
+   [
+    "exploring",
+    "Just exploring"
+   ]
+  ],
+  "needs": [
+   [
+    "cofounder",
+    "A co-founder"
+   ],
+   [
+    "validation",
+    "Validating the idea"
+   ],
+   [
+    "product",
+    "Building the product"
+   ],
+   [
+    "gtm",
+    "Finding customers"
+   ],
+   [
+    "funding",
+    "Funding"
+   ],
+   [
+    "studio",
+    "Full studio support"
+   ]
+  ]
+ },
+ "proof": {
+  "frequency": [
+   [
+    "daily",
+    "Every day"
+   ],
+   [
+    "weekly",
+    "Every week"
+   ],
+   [
+    "monthly",
+    "Every month"
+   ],
+   [
+    "rarely",
+    "A few times a year"
+   ]
+  ],
+  "pay": [
+   [
+    "none",
+    "Wouldn't pay"
+   ],
+   [
+    "small",
+    "A little (under ₹200 / $5 a month)"
+   ],
+   [
+    "medium",
+    "Some (₹200–1,000 / $5–20 a month)"
+   ],
+   [
+    "high",
+    "A lot (₹1,000+ / $20+ a month)"
+   ]
+  ],
+  "who": [
+   [
+    "consumer",
+    "Me, personally"
+   ],
+   [
+    "family",
+    "My family"
+   ],
+   [
+    "business",
+    "My business"
+   ],
+   [
+    "employer",
+    "The company I work at"
+   ],
+   [
+    "student",
+    "Me, as a student"
+   ]
+  ]
+ },
+ "reportReasons": [
+  [
+   "spam",
+   "Spam or advertising"
+  ],
+  [
+   "abusive",
+   "Abusive, hateful or harassing"
+  ],
+  [
+   "personal",
+   "Shares someone's private details"
+  ],
+  [
+   "false",
+   "Misleading or fake"
+  ],
+  [
+   "other",
+   "Something else"
+  ]
+ ],
+ "links": {
+  "privacy": "https://atlaselevatr.in/privacy",
+  "about": "https://atlaselevatr.in/about",
+  "studio": "https://atlaselevatr.in/studio",
+  "contact": "hello@atlaselevatr.in"
+ }
+}

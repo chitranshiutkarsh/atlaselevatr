@@ -25,7 +25,9 @@ The world's unsolved problems, mapped and ranked. An Elevtr Ventures initiative.
   - **Follow a problem** by email: people hear when someone claims it or suggests a fix (`lib/follow.js`, needs `RESEND_API_KEY`).
   - **Studio** (`/studio`): how the loop works, biggest gaps, what builders get, and the builders board.
   - One startup form for the directory and for problem pages; the raiser's idea is pinned in the solutions thread; jobs can be tagged to an industry or problem and show on problem pages; sign-in can also switch on the weekly digest; the invite card lives in My Atlas.
-- **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns.
+- **Admin** (`/admin`): add/pause/delete jobs, hide or delete problems, add or edit unicorns, and act on reports from the phone app.
+- **Phone app** (`mobile/`): Atlas for iPhone and Android, built with Expo. It uses the same database through the `/api/app/*` endpoints (problem feed, problem page, map, gaps, jobs, builders, My Atlas, reports). The app identifies a phone by a random device id sent in the `x-atlas-device` header instead of a cookie. People can report any problem, story, comment or builder card; reports land in `/admin → Reports`, and an item reported by 3 different people (5 for a problem) is hidden until an admin decides. See `mobile/README.md` to run it and publish it to the App Store and Google Play.
+- **Privacy** (`/privacy`): what Atlas collects, for the website and the app (required by both app stores).
 
 Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed on Vercel.
 
@@ -42,6 +44,7 @@ Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed o
    | `RESEND_API_KEY` | from [resend.com](https://resend.com) → API Keys (for sign-in links and the digest) |
    | `EMAIL_FROM` | e.g. `Atlas <hello@atlaselevatr.in>` (verify the domain in Resend first) |
    | `CRON_SECRET` | any long random text (protects the weekly digest job) |
+   | `CONTACT_EMAIL` | an inbox you read, e.g. `hello@atlaselevatr.in` (shown on `/privacy` and in the app) |
 4. **Redeploy.** **Deployments → ⋯ on the latest → Redeploy.** Tables are created and the starter unicorn list is loaded automatically on the first visit.
 5. **Connect the domain.** **Settings → Domains → Add** `atlaselevatr.in` (and `www.atlaselevatr.in`). Vercel shows the DNS records to add at your domain registrar.
 
