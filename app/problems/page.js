@@ -169,22 +169,20 @@ export default async function ProblemsPage({ searchParams }) {
         <aside className="space-y-4">
           <Link href="/submit" className="btn-primary w-full">+ Add a problem</Link>
           <div className="card p-5 text-sm">
-            <p className="label">How a problem becomes a company</p>
+            <p className="label">How Atlas works</p>
             <ol className="mt-3 space-y-2">
               {[
-                ['▲', 'Face it', 'People say they have the problem.'],
-                ['🙋', 'Validate', `${VALIDATION.proofs} first-hand stories.`],
-                ['◎', 'Gap check', 'Is anyone already solving it here?'],
-                ['🚀', 'Claim', 'A builder takes it on.'],
-                ['★', 'Studio', 'The venture studio backs the best.'],
-              ].map(([icon, t, d]) => (
-                <li key={t} className="flex gap-2">
-                  <span className="w-5 shrink-0 text-center">{icon}</span>
+                ['1', 'You pick a problem', 'Open one and tap ♡ I care about this.'],
+                ['2', 'Atlas finds the startups working on it', 'Listed on every problem page.'],
+                ['3', 'Atlas shows their open jobs', 'Each role shows the problem you’d solve.'],
+              ].map(([n, t, d]) => (
+                <li key={n} className="flex gap-2">
+                  <span className="w-5 shrink-0 text-center font-mono text-signal">{n}</span>
                   <span><span className="font-semibold">{t}.</span> <span className="text-ink2">{d}</span></span>
                 </li>
               ))}
             </ol>
-            <Link href="/studio" className="mt-3 inline-block font-semibold text-signal hover:underline">How the studio works →</Link>
+            <Link href="/jobs?tab=problems" className="mt-3 inline-block font-semibold text-signal hover:underline">See jobs by problem →</Link>
           </div>
           <div className="card p-5">
             <p className="label">Where people face problems</p>

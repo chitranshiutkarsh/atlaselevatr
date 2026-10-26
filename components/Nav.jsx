@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { SITE } from '@/lib/constants';
 
-// Kept short on purpose: jobs on the problems you care about come first.
-// Invite and About live in the footer and in My Atlas.
+// The menu follows how Atlas works: pick a problem → the startups working on
+// it → their open jobs. Invite and About live in the footer and in My Atlas.
 const LINKS = [
   { href: '/', label: 'Atlas' },
-  { href: '/jobs', label: 'Jobs' },
   { href: '/problems', label: 'Problems' },
   { href: '/startups', label: 'Startups' },
-  { href: '/studio', label: 'Studio' },
+  { href: '/jobs', label: 'Jobs' },
+  { href: '/studio', label: 'My story' },
 ];
 
 export default function Nav({ signedIn = false }) {

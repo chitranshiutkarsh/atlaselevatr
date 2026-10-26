@@ -34,9 +34,13 @@ export default function StartupsPage({ searchParams }) {
         Startups in {scopeLabel}
       </h1>
       <p className="mt-3 max-w-2xl text-ink2">
-        Every startup, sorted into categories, with what it does and where it&apos;s based. Unicorns are listed first.
+        The startups working on the problems people face, with what each one solves and where it&apos;s based. Startups
+        that are hiring show their open roles. Each problem page lists the startups working on it.
       </p>
-      <Link href="/startups/add" className="btn-primary mt-5">+ List your startup</Link>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link href="/jobs?tab=problems" className="btn-primary">See jobs by problem</Link>
+        <Link href="/startups/add" className="btn-ghost">+ List your startup</Link>
+      </div>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {tabs.map((t) => (

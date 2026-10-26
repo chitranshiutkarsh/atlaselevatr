@@ -96,7 +96,7 @@ export default function LiveLeaderboard({ initial, sort, query, formula }) {
         const latest = new Map(problems.map((p) => [p.id, p]));
         reorder((prev) => {
           const known = new Set(prev.map((p) => p.id));
-          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments, builders: latest.get(p.id).builders, proofs: latest.get(p.id).proofs, validated: latest.get(p.id).validated, studio: latest.get(p.id).studio, merit: latest.get(p.id).merit, views: latest.get(p.id).views } : p));
+          const updated = prev.map((p) => (latest.has(p.id) ? { ...p, votes: latest.get(p.id).votes, comments: latest.get(p.id).comments, builders: latest.get(p.id).builders, proofs: latest.get(p.id).proofs, validated: latest.get(p.id).validated, studio: latest.get(p.id).studio, merit: latest.get(p.id).merit, views: latest.get(p.id).views, roles: latest.get(p.id).roles } : p));
           // Discover is a fresh shuffle each visit: update numbers, don't add or reorder.
           const added = sort === 'discover' ? [] : problems.filter((p) => !known.has(p.id));
           return [...updated, ...added];
@@ -170,6 +170,13 @@ export default function LiveLeaderboard({ initial, sort, query, formula }) {
                 </p>
                 {p.details && <p className="mt-2 text-sm text-ink2">{p.details}</p>}
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                  {p.roles > 0 ? (
+                    <Link href={`/jobs?problem=${p.id}`} className="font-semibold text-ink underline decoration-ink/30 hover:text-signal">
+                      💼 {p.roles.toLocaleString('en-IN')} open role{p.roles === 1 ? '' : 's'}
+                    </Link>
+                  ) : (
+                    <Link href={`/problems/${p.id}#work`} className="text-ink2 hover:text-ink">💼 No open roles yet</Link>
+                  )}
                   <Link href={`/problems/${p.id}#proof`} className="font-semibold text-moss hover:underline">
                     🙋 {p.proofs > 0 ? `${p.proofs} ${p.proofs === 1 ? 'story' : 'stories'}` : 'Add your story'}
                   </Link>

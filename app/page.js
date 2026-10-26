@@ -9,11 +9,11 @@ import { jobsStats, listRoles } from '@/lib/roles';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
+// How Atlas works, in three steps. The menu follows the same order.
 const STEPS = [
-  ['♡', 'Care', 'Pick the problems you care about.', '/jobs?tab=for-you'],
-  ['◎', 'See who’s solving them', 'Every problem is matched to the startups working on it.', '/problems'],
-  ['↗', 'Apply', 'Open roles at those startups, with the problem each one solves.', '/jobs?tab=all'],
-  ['🚀', 'Or build it', 'No one solving it? Claim it and start it yourself.', '/problems?view=gaps'],
+  ['1', 'You pick a problem', 'Browse the problems people face and tap ♡ on the ones you care about.', '/problems', 'Pick a problem'],
+  ['2', 'Atlas finds the startups working on it', 'Every problem is matched to the startups already building a fix, here and worldwide.', '/startups', 'See the startups'],
+  ['3', 'Atlas shows those startups’ open jobs', 'Their open roles, straight from their careers pages, each showing the problem you’d be solving.', '/jobs', 'See the jobs'],
 ];
 
 export default async function Home() {
@@ -65,6 +65,22 @@ export default async function Home() {
           <Link href="/submit" className="btn-ghost">+ Add a problem</Link>
         </div>
 
+        <ol aria-label="How Atlas works" className="mt-10 grid gap-3 md:grid-cols-3">
+          {STEPS.map(([n, t, d, link, cta], i) => (
+            <li key={n} className="card relative flex flex-col p-5">
+              <p className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink font-display text-lg font-semibold text-paper">{n}</span>
+                <span className="font-display text-xl font-semibold leading-snug">{t}</span>
+              </p>
+              <p className="mt-3 flex-1 text-sm text-ink2">{d}</p>
+              <Link href={link} className="mt-3 text-sm font-semibold text-signal hover:underline">{cta} →</Link>
+              {i < STEPS.length - 1 && (
+                <span aria-hidden="true" className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-paper text-ink2 md:flex">→</span>
+              )}
+            </li>
+          ))}
+        </ol>
+
         <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-ink/10 bg-ink/10 sm:grid-cols-4">
           {numbers.map(([label, value, link]) => (
             <div key={label} className="bg-paper px-4 py-3">
@@ -79,21 +95,6 @@ export default async function Home() {
             </div>
           ))}
         </dl>
-      </section>
-
-      <section className="mt-10">
-        <p className="label">How Atlas works</p>
-        <ol className="mt-3 grid gap-px overflow-hidden rounded-xl border border-ink/10 bg-ink/10 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map(([icon, t, d, link]) => (
-            <li key={t} className="bg-paper">
-              <Link href={link} className="block h-full p-4 hover:bg-paper2/50">
-                <p className="text-lg" aria-hidden="true">{icon}</p>
-                <p className="mt-1 font-semibold">{t}</p>
-                <p className="mt-1 text-sm text-ink2">{d}</p>
-              </Link>
-            </li>
-          ))}
-        </ol>
       </section>
 
       {fresh.roles.length > 0 && (
