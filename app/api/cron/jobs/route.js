@@ -11,7 +11,7 @@ export async function GET(request) {
     return Response.json({ error: 'Not allowed' }, { status: 401 });
   }
   try {
-    return Response.json(await runJobsRefresh({ budgetMs: 270000, discover: 600 }));
+    return Response.json(await runJobsRefresh({ budgetMs: 270000, discover: 600, matchMax: 200 }));
   } catch (err) {
     console.error(err);
     return Response.json({ error: 'Jobs run failed' }, { status: 500 });
