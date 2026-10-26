@@ -4,7 +4,7 @@ import RoleCard from '@/components/RoleCard';
 import CareButton from '@/components/CareButton';
 import JobsRefreshPing from '@/components/JobsRefreshPing';
 import { listJobs } from '@/lib/queries';
-import { caredProblemIds, listCaredProblems, listRoles, pickerProblems, roleFacets, jobsStats } from '@/lib/roles';
+import { caredProblemIds, listCaredProblems, listRoles, pickerProblems, roleFacets, jobsStats, problemsWithRoles, problemsAwaitingMatches } from '@/lib/roles';
 import { getUserId } from '@/lib/auth';
 import { getVisitorId } from '@/lib/security';
 import { db } from '@/lib/db';
@@ -51,6 +51,8 @@ export default async function JobsPage({ searchParams }) {
   let focusProblem = null;
   let focusCompany = null;
   let tab;
+  let byProblem = [];
+  let awaiting = 0;
   try {
     const visitorId = getVisitorId();
     const userId = getUserId();
@@ -60,7 +62,13 @@ export default async function JobsPage({ searchParams }) {
       roleFacets(),
       listJobs().catch(() => []),
     ]);
-    tab = problemId || companyId ? 'all' : searchParams.tab === 'all' ? 'all' : searchParams.tab === 'for-you' || cared.length ? 'for-you' : 'all';
+    tab = problemId || companyId
+      ? 'all'
+      : ['all', 'problems'].includes(searchParams.tab)
+        ? searchParams.tab
+        : searchParams.tab === 'for-you' || cared.length
+          ? 'for-you'
+          : 'all';
 
     const sql = await db();
     if (problemId) [focusProblem] = await sql`SELECT id, title, votes, cares FROM problems WHERE id = ${problemId} AND status = 'live'`;
@@ -68,7 +76,9 @@ export default async function JobsPage({ searchParams }) {
 
     const focus = focusProblem ? [focusProblem.id] : tab === 'for-you' ? cared : null;
     const filters = { kind, country, remote, industry, q, companyId: focusCompany?.id || null, limit: PAGE, offset: (page - 1) * PAGE };
-    if (!(tab === 'for-you' && !focusProblem && cared.length === 0)) {
+    if (tab === 'problems') {
+      [byProblem, awaiting] = await Promise.all([problemsWithRoles({ q, industry }), problemsAwaitingMatches()]);
+    } else if (!(tab === 'for-you' && !focusProblem && cared.length === 0)) {
       result = await listRoles({ ...filters, focus });
     }
     if (tab === 'for-you') {
@@ -110,7 +120,15 @@ export default async function JobsPage({ searchParams }) {
       <p className="mt-4 max-w-2xl text-lg text-ink2">
         {importing
           ? 'Open roles come straight from the careers pages of the startups mapped on Atlas, and each one is linked to the problem its company is solving.'
-          : `${stats.roles.toLocaleString('en-IN')} open roles at ${stats.hiring.toLocaleString('en-IN')} startups working on ${stats.problems_with_roles.toLocaleString('en-IN')} problems. Each role shows the problem you'd be solving.`}
+          : (
+            <>
+              {stats.roles.toLocaleString('en-IN')} open roles at {stats.hiring.toLocaleString('en-IN')} startups working on{' '}
+              <Link href="/jobs?tab=problems" className="font-semibold text-ink underline decoration-ink/30 hover:text-signal">
+                {stats.problems_with_roles.toLocaleString('en-IN')} problems
+              </Link>
+              . Each role shows the problem you&apos;d be solving.
+            </>
+          )}
       </p>
 
       {focusProblem || focusCompany ? (
@@ -132,6 +150,7 @@ export default async function JobsPage({ searchParams }) {
         <div className="mt-6 flex flex-wrap gap-1 border-b border-ink/10">
           {[
             ['for-you', `♥ For you${cared.length ? ` · ${cared.length} problem${cared.length === 1 ? '' : 's'}` : ''}`],
+            ['problems', `By problem${stats.problems_with_roles ? ` · ${stats.problems_with_roles}` : ''}`],
             ['all', 'All roles'],
           ].map(([key, label]) => (
             <Link
@@ -190,7 +209,56 @@ export default async function JobsPage({ searchParams }) {
         </section>
       )}
 
-      {!(tab === 'for-you' && cared.length === 0 && !focusProblem) && (
+      {tab === 'problems' && (
+        <section className="mt-6">
+          <form action="/jobs" method="get" className="flex flex-col gap-2 sm:flex-row">
+            <input type="hidden" name="tab" value="problems" />
+            <input name="q" defaultValue={q || ''} className="input sm:flex-1" placeholder="Search problems, e.g. health, payments, climate" maxLength={80} aria-label="Search problems" />
+            <select name="industry" defaultValue={industry || ''} className="input sm:w-56" aria-label="Area">
+              <option value="">Any area</option>
+              {INDUSTRIES.map((i) => <option key={i} value={i}>{i}</option>)}
+            </select>
+            <button className="btn-primary">Search</button>
+          </form>
+          <p className="mt-4 text-sm text-ink2">
+            {byProblem.length.toLocaleString('en-IN')} problem{byProblem.length === 1 ? '' : 's'} with open roles
+            {q || industry ? ' matching your search' : ''}, most roles first.
+            {awaiting > 0 ? ` ${awaiting} more problem${awaiting === 1 ? ' is' : 's are'} still being matched to startups.` : ''}
+          </p>
+          {byProblem.length === 0 ? (
+            <div className="card mt-4 p-8">
+              <p className="font-display text-2xl font-semibold">{q || industry ? 'No problems match that' : 'Matching problems to hiring startups'}</p>
+              <p className="mt-2 max-w-2xl text-ink2">
+                {q || industry
+                  ? 'Try another search, or browse all roles.'
+                  : 'Atlas is linking each problem to the startups working on it and reading their careers pages. This list fills in over the next hour.'}
+              </p>
+            </div>
+          ) : (
+            <ul className="mt-4 grid gap-3 md:grid-cols-2">
+              {byProblem.map((p) => (
+                <li key={p.id} className="card flex min-w-0 flex-col p-5">
+                  <Link href={`/problems/${p.id}`} className="font-semibold leading-snug hover:text-signal">{p.title}</Link>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink2">
+                    {p.industry} · {prettyName(p.country)}{p.votes > 0 ? ` · ▲ ${p.votes} face it` : ''}
+                  </p>
+                  <p className="mt-3 text-sm">
+                    <span className="font-display text-2xl font-semibold">{p.roles.toLocaleString('en-IN')}</span>{' '}
+                    open role{p.roles === 1 ? '' : 's'} at {p.startups} startup{p.startups === 1 ? '' : 's'}
+                  </p>
+                  {p.companies && <p className="mt-1 truncate text-sm text-ink2">{p.companies}</p>}
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
+                    <CareButton problemId={p.id} initialCared={caredSet.has(p.id)} initialCount={p.cares} compact />
+                    <Link href={href({}, { problem: p.id })} className="btn-primary px-4 py-2">See roles →</Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {tab !== 'problems' && !(tab === 'for-you' && cared.length === 0 && !focusProblem) && (
         <section className="mt-8">
           <form action="/jobs" method="get" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_200px_200px_200px_auto]">
             {current.tab && <input type="hidden" name="tab" value={current.tab} />}

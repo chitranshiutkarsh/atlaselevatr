@@ -37,7 +37,7 @@ export default async function Home() {
     ? [
         ['Open roles', jobs.roles],
         ['Startups hiring', jobs.hiring],
-        ['Problems with roles', jobs.problems_with_roles],
+        ['Problems with roles', jobs.problems_with_roles, '/jobs?tab=problems'],
         ['Startups mapped', stats.companies],
       ]
     : [
@@ -66,10 +66,16 @@ export default async function Home() {
         </div>
 
         <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-ink/10 bg-ink/10 sm:grid-cols-4">
-          {numbers.map(([label, value]) => (
+          {numbers.map(([label, value, link]) => (
             <div key={label} className="bg-paper px-4 py-3">
               <dt className="label">{label}</dt>
-              <dd className="mt-1 font-display text-3xl font-semibold">{Number(value || 0).toLocaleString('en-IN')}</dd>
+              <dd className="mt-1 font-display text-3xl font-semibold">
+                {link ? (
+                  <Link href={link} className="hover:text-signal">{Number(value || 0).toLocaleString('en-IN')} →</Link>
+                ) : (
+                  Number(value || 0).toLocaleString('en-IN')
+                )}
+              </dd>
             </div>
           ))}
         </dl>
