@@ -20,6 +20,7 @@ export default function Footer() {
           <Link href="/jobs" className="hover:text-ink">Jobs</Link>
           <Link href="/invite" className="hover:text-ink">Invite</Link>
           <Link href="/about" className="hover:text-ink">About {SITE.parent}</Link>
+          <Link href="/privacy" className="hover:text-ink">Privacy</Link>
         </div>
       </div>
     </footer>

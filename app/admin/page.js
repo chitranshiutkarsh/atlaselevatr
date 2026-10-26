@@ -25,7 +25,7 @@ export default async function AdminPage() {
 
   try {
     const sql = await db();
-    const [problems, jobs, companies, [{ n: companyTotal }], submissions, comments, leads, proofs, intros] = await Promise.all([
+    const [problems, jobs, companies, [{ n: companyTotal }], submissions, comments, leads, proofs, intros, reports] = await Promise.all([
       sql`SELECT id, title, industry, country, votes, status, author FROM problems ORDER BY created_at DESC LIMIT 300`,
       listJobs({ includeInactive: true }),
       sql`SELECT id, name, country, industry, problem, website, city, sector, is_unicorn FROM companies WHERE is_unicorn ORDER BY continent, name`,
@@ -42,6 +42,16 @@ export default async function AdminPage() {
           p.id AS problem_id, p.title AS problem
         FROM intro_requests i JOIN builder_interests b ON b.id = i.builder_id JOIN problems p ON p.id = b.problem_id
         ORDER BY (i.status = 'new') DESC, i.created_at DESC LIMIT 200`,
+      // Reports from the phone app, newest open ones first, with the reported text.
+      sql`SELECT r.id, r.kind, r.item_id, r.reason, r.note, r.status, r.created_at, r.problem_id, p.title AS problem,
+          CASE r.kind
+            WHEN 'problem' THEN p.title
+            WHEN 'comment' THEN (SELECT body FROM problem_comments WHERE id = r.item_id)
+            WHEN 'story' THEN (SELECT story FROM problem_proofs WHERE id = r.item_id)
+            WHEN 'builder' THEN (SELECT coalesce(headline, split_part(name, ' ', 1)) FROM builder_interests WHERE id = r.item_id)
+          END AS content
+        FROM reports r LEFT JOIN problems p ON p.id = r.problem_id
+        ORDER BY (r.status = 'new') DESC, r.created_at DESC LIMIT 200`,
     ]);
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
@@ -49,6 +59,7 @@ export default async function AdminPage() {
         leads={leads.map((l) => ({ ...l, created_at: new Date(l.created_at).toISOString() }))}
         proofs={proofs}
         intros={intros.map((i) => ({ ...i, created_at: new Date(i.created_at).toISOString() }))}
+        reports={reports.map((r) => ({ ...r, created_at: new Date(r.created_at).toISOString() }))}
       />;
   } catch (err) {
     console.error(err);
