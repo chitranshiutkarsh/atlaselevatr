@@ -35,7 +35,7 @@ export async function POST(request) {
       WHERE ip_hash = ${ip} AND updated_at > now() - interval '1 hour'`;
     if (recent >= 5) return jsonError('That’s a lot of links in an hour. Please try again later.', 429);
 
-    const [company] = await sql`SELECT id, name, country, city FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
+    const [company] = await sql`SELECT id, name, country, city, problem, is_unicorn FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
     if (!company) {
       return Response.json(
         { error: 'not_listed', message: `${name} isn’t on Atlas yet. List it first, then add your careers page.` },

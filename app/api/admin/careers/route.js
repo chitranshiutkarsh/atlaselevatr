@@ -24,7 +24,7 @@ export async function POST(request) {
   const url = typeof body.url === 'string' ? body.url.trim().slice(0, 500) : '';
   if (!name || !url) return jsonError('Add the startup name and its careers link.');
   const sql = await db();
-  const [company] = await sql`SELECT id, name, country, city FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
+  const [company] = await sql`SELECT id, name, country, city, problem, is_unicorn FROM companies WHERE lower(name) = lower(${name}) LIMIT 1`;
   if (!company) return jsonError(`No startup called “${name}” in the directory. Add it under Startups first.`);
   const result = await addCareersLink({ company, url, source: 'admin' });
   if (result.error) return jsonError(result.error);
