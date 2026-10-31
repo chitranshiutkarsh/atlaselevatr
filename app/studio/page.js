@@ -8,65 +8,76 @@ export const maxDuration = 60;
 export const metadata = {
   title: 'My story',
   description:
-    'Atlas is a passion project of Utkarsh Chitranshi, CEO at Savart. His journey from engineering and ed-tech to Nykaa, DSCI (NASSCOM) and Savart.',
+    'Utkarsh Chitranshi: 1X Founder, 1X CEO. From a farm robot in college to running a wealthtech, through ed-tech, Nykaa, DSCI (NASSCOM) and an MBA with INSEAD. Atlas is his passion project.',
 };
 
 const LINKEDIN = 'https://www.linkedin.com/in/utkarshchitranshi/';
 
 const label = (list, key) => list.find(([k]) => k === key)?.[1] || key;
 
-// Oldest first, so the page reads as a story. Keep in step with LinkedIn.
+// Latest first: the story starts at the top job and runs back to the start.
 const JOURNEY = [
   {
-    when: '2016 – 2020',
-    role: 'B.Tech, Computer Science',
-    org: 'CGC-COE, Punjab Technical University',
-    note: 'Engineering, and a first research paper, on blockchain in India (IEEE).',
-  },
-  {
-    when: '2017 – 2019',
-    role: 'Co-founder',
-    org: 'Care4Plants',
-    note: 'Built a LiDAR and IoT farm robot, won DST (Government of India) research funding and filed a patent.',
-  },
-  {
-    when: '2019 – 2022',
-    role: "Founder's Office → Product Manager",
-    org: 'Lido Learning',
-    note: 'First product hire at a K-12 ed-tech startup; took the tutor platform from 0 to 1.',
-  },
-  {
-    when: '2021',
-    role: "Manager, Founder's Office",
-    org: 'English Quest',
-    note: 'Took an ed-tech app into Vietnam and Korea and supported the seed round.',
-  },
-  {
-    when: '2022 – 2023',
-    role: 'Product Manager → Senior Project Manager, CTO Office',
-    org: 'Nykaa',
-    note: 'Owned Cart & Checkout, led PCI-DSS certification and ran the first version of Nykaa Now.',
-  },
-  {
-    when: '2024 – 2025',
-    role: 'MBA (PGDM, Business Analytics)',
-    org: 'SPJIMR Mumbai, with an immersion at INSEAD',
-    note: 'Headed the product management club and studied global strategy at INSEAD, France.',
+    when: '2026',
+    kicker: 'The top job',
+    role: 'CEO',
+    org: 'Savart',
+    note: 'Ran a wealthtech end to end: product, growth, research and the team. Built the product everyday investors use to pick stocks and funds that fit them, and opened new lines of business.',
+    hero: true,
   },
   {
     when: '2025',
-    role: "Senior Manager, CEO's Office",
-    org: 'DSCI (NASSCOM)',
-    note: 'Chief of Staff to the CEO, running strategy, planning and special initiatives.',
+    kicker: 'Right hand to the CEO',
+    role: 'Chief of Staff',
+    org: "CEO's Office, DSCI (NASSCOM)",
+    note: 'Strategy, planning and new initiatives at India’s cybersecurity industry body, working closely with early-stage startups.',
   },
   {
-    when: '2026 – now',
-    role: 'CEO',
-    org: 'Savart',
-    note: 'Leading Savart, a wealthtech helping everyday investors in India build stock and mutual fund portfolios that fit their needs and temperament, backed by research and AI recommendations.',
-    now: true,
+    when: '2024 – 2025',
+    kicker: 'Sharpening the saw',
+    role: 'MBA',
+    org: 'SPJIMR Mumbai · INSEAD, France',
+    note: 'Business analytics and global strategy. Led the product management club.',
+  },
+  {
+    when: '2022 – 2023',
+    kicker: 'Building at scale',
+    role: 'Product & CTO Office',
+    org: 'Nykaa',
+    note: 'Owned Cart & Checkout, led payment-security certification, worked with the CTO office and shipped the first version of Nykaa Now.',
+  },
+  {
+    when: '2021',
+    kicker: 'Going global',
+    role: "Founder's Office",
+    org: 'English Quest',
+    note: 'Took an ed-tech app into Vietnam and Korea and helped raise the seed round.',
+  },
+  {
+    when: '2019 – 2022',
+    kicker: 'Zero to one',
+    role: 'First product hire',
+    org: 'Lido Learning',
+    note: 'Joined a K-12 ed-tech startup in the founder’s office and built its tutor platform from scratch.',
+  },
+  {
+    when: '2017 – 2019',
+    kicker: 'Where it started',
+    role: 'Co-founder',
+    org: 'Care4Plants',
+    note: 'Built a LiDAR farm robot in college, won Government of India research funding and filed a patent.',
+    founder: true,
+  },
+  {
+    when: '2016 – 2020',
+    kicker: 'The foundation',
+    role: 'B.Tech, Computer Science',
+    org: 'Punjab Technical University',
+    note: 'Engineering, and a first research paper, on blockchain in India.',
   },
 ];
+
+const ARENAS = ['Wealthtech', 'Cybersecurity', 'E-commerce', 'Ed-tech', 'Agri-robotics'];
 
 export default async function StudioPage({ searchParams }) {
   const need = BUILDER_NEEDS.some(([k]) => k === searchParams.need) ? searchParams.need : null;
@@ -79,51 +90,97 @@ export default async function StudioPage({ searchParams }) {
     console.error(err);
   }
 
+  const [ceo, ...rest] = JOURNEY;
+
   return (
     <div className="pt-12">
-      <p className="label">Studio · My story</p>
-      <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-        Atlas is my <span className="italic text-signal">passion project</span>.
-      </h1>
-      <p className="mt-5 max-w-2xl text-lg text-ink2">
-        I’m Utkarsh Chitranshi, CEO at Savart. I built Atlas to map the problems people face, show who is already
-        solving them, and help people find the gaps worth building, or join a project that’s already underway.
-      </p>
-
-      <section className="mt-12 grid gap-10 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="card h-fit p-6 lg:sticky lg:top-24">
-          <div
-            aria-hidden="true"
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-ink font-display text-2xl font-semibold text-paper"
-          >
-            UC
-          </div>
-          <p className="mt-4 font-display text-2xl font-semibold leading-tight">Utkarsh Chitranshi</p>
-          <p className="mt-1 text-ink2">CEO at Savart</p>
-          <p className="mt-3 text-sm text-ink2">Ex-DSCI (NASSCOM), Nykaa, Lido Learning · MBA, SPJIMR</p>
-          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="btn-primary mt-5 w-full">
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl bg-ink px-6 py-12 text-paper sm:px-12 sm:py-16">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-signal/25 blur-3xl"
+        />
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/60">Studio · My story</p>
+        <h1 className="mt-4 font-display text-6xl font-semibold leading-[0.95] tracking-tight sm:text-8xl">
+          1X Founder.
+          <br />
+          <span className="italic text-signal">1X CEO.</span>
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg text-paper/80 sm:text-xl">
+          I’m Utkarsh Chitranshi. I’ve started a company and I’ve run one. Along the way I’ve built products, opened
+          markets and sat beside the people making the calls. Atlas is my passion project: a map of the problems worth
+          building for.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          {ARENAS.map((a) => (
+            <span key={a} className="rounded-full border border-paper/25 px-3 py-1 text-xs font-medium text-paper/85">
+              {a}
+            </span>
+          ))}
+        </div>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="btn bg-signal text-white hover:bg-paper hover:text-ink">
             Connect on LinkedIn ↗
           </a>
-        </aside>
-
-        <div>
-          <p className="label">My journey</p>
-          <h2 className="mt-1 font-display text-3xl font-semibold">The road so far</h2>
-          <ol className="mt-6 border-l border-ink/15">
-            {JOURNEY.map((j) => (
-              <li key={`${j.when}-${j.org}`} className="relative pb-8 pl-6 last:pb-0">
-                <span
-                  aria-hidden="true"
-                  className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ${j.now ? 'bg-signal' : 'bg-ink'}`}
-                />
-                <p className="font-mono text-xs text-signal">{j.when}</p>
-                <h3 className="mt-1 font-display text-xl font-semibold leading-snug">{j.role}</h3>
-                <p className="text-sm font-medium">{j.org}</p>
-                <p className="mt-1 max-w-2xl text-sm text-ink2">{j.note}</p>
-              </li>
-            ))}
-          </ol>
+          <a href="#journey" className="btn border border-paper/30 text-paper hover:border-paper">
+            Read the story ↓
+          </a>
         </div>
+      </section>
+
+      {/* Journey, latest first */}
+      <section id="journey" className="mt-16 scroll-mt-24">
+        <p className="label">The story, latest first</p>
+        <h2 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">From the top job back to day one.</h2>
+
+        {/* The CEO chapter leads */}
+        <article className="mt-8 grid gap-6 rounded-3xl border-2 border-ink bg-white p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-end">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-signal">{ceo.kicker} · {ceo.when}</p>
+            <p className="mt-2 font-display text-8xl font-semibold leading-none tracking-tight sm:text-9xl">{ceo.role}</p>
+            <p className="mt-3 text-2xl font-semibold">{ceo.org}</p>
+          </div>
+          <p className="text-lg text-ink2 sm:text-xl">{ceo.note}</p>
+        </article>
+
+        {/* Everything before it */}
+        <ol className="mt-4 divide-y divide-ink/10 rounded-3xl border border-ink/10 bg-white/70">
+          {rest.map((j) => (
+            <li
+              key={`${j.when}-${j.org}`}
+              className={`grid gap-3 p-6 sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1.1fr)] sm:items-baseline sm:gap-8 sm:p-8 ${
+                j.founder ? 'bg-signal/[0.06]' : ''
+              }`}
+            >
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-ink2">{j.when}</p>
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-signal">{j.kicker}</p>
+                <h3 className="mt-1 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+                  {j.role}
+                  {j.founder && (
+                    <span className="ml-3 rounded-full bg-signal px-2.5 py-1 align-middle font-mono text-[10px] uppercase tracking-wide text-white">
+                      Founder
+                    </span>
+                  )}
+                </h3>
+                <p className="mt-1 font-semibold">{j.org}</p>
+              </div>
+              <p className="text-ink2">{j.note}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* The thread */}
+      <section className="mt-16 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:items-center">
+        <p className="font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+          Find a real problem. <span className="italic text-signal">Then build.</span>
+        </p>
+        <p className="text-lg text-ink2">
+          A farm robot in college, a tutor platform from scratch, the checkout of a beauty giant, a company to run. The
+          thread is the same every time, and it’s why Atlas exists: so more people can find the problem that’s theirs
+          to solve, or join someone already solving it.
+        </p>
       </section>
 
       {builders && (
