@@ -8,7 +8,7 @@ export const maxDuration = 60;
 export const metadata = {
   title: 'My story',
   description:
-    'Utkarsh Chitranshi: 1X Founder, 1X CEO. From a farm robot in college to running a wealthtech, through ed-tech, Nykaa, DSCI (NASSCOM) and an MBA with INSEAD. Atlas is his passion project.',
+    'Utkarsh Chitranshi: 1X Founder, 1X CEO. Granted patent, Wiley book chapter, IEEE paper. From a farm robot in college to running a wealthtech, through ed-tech, Nykaa, DSCI (NASSCOM) and an MBA with INSEAD. Atlas is his passion project.',
 };
 
 const LINKEDIN = 'https://www.linkedin.com/in/utkarshchitranshi/';
@@ -65,7 +65,7 @@ const JOURNEY = [
     kicker: 'Where it started',
     role: 'Co-founder',
     org: 'Care4Plants',
-    note: 'Built a LiDAR farm robot in college, won Government of India research funding and filed a patent.',
+    note: 'Built a LiDAR farm robot in college, won Government of India research funding and was granted a patent.',
     founder: true,
   },
   {
@@ -73,8 +73,16 @@ const JOURNEY = [
     kicker: 'The foundation',
     role: 'B.Tech, Computer Science',
     org: 'Punjab Technical University',
-    note: 'Engineering, and a first research paper, on blockchain in India.',
+    note: 'Engineering, an IEEE paper and a Wiley book chapter on blockchain.',
   },
+];
+
+// Proof points, from LinkedIn and the papers themselves.
+const HIGHLIGHTS = [
+  { icon: '👥', title: '10K+ followers', detail: 'on LinkedIn', href: LINKEDIN },
+  { icon: '📜', title: 'Patent granted', detail: 'Plant monitoring system · Patent Office, Govt. of India' },
+  { icon: '📘', title: 'Book chapter', detail: 'Wiley · Application view towards blockchain: demystifying the myths' },
+  { icon: '📄', title: 'Research paper', detail: 'IEEE · Possibilities of blockchain in the Indian market and advertising' },
 ];
 
 const ARENAS = ['Wealthtech', 'Cybersecurity', 'E-commerce', 'Ed-tech', 'Agri-robotics'];
@@ -127,6 +135,32 @@ export default async function StudioPage({ searchParams }) {
         </div>
       </section>
 
+      {/* Proof points */}
+      <ul className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+        {HIGHLIGHTS.map((h) => {
+          const body = (
+            <>
+              <span aria-hidden="true" className="text-lg leading-none">{h.icon}</span>
+              <span className="min-w-0">
+                <span className="block font-display text-sm font-semibold leading-tight">{h.title}</span>
+                <span className="mt-0.5 block text-[11px] leading-snug text-ink2">{h.detail}</span>
+              </span>
+            </>
+          );
+          return (
+            <li key={h.title}>
+              {h.href ? (
+                <a href={h.href} target="_blank" rel="noopener noreferrer" className="flex h-full gap-2.5 rounded-lg border border-ink/10 bg-white/80 p-3 transition hover:border-signal">
+                  {body}
+                </a>
+              ) : (
+                <div className="flex h-full gap-2.5 rounded-lg border border-ink/10 bg-white/80 p-3">{body}</div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
       {/* Journey: a road of stops, today first. Four across on desktop, a tight line on mobile. */}
       <section id="journey" className="mt-6 scroll-mt-24">
         <div className="flex items-baseline justify-between">
@@ -142,24 +176,19 @@ export default async function StudioPage({ searchParams }) {
               <span
                 aria-hidden="true"
                 className={`absolute -left-[27px] top-3.5 rounded-full border-2 border-paper lg:left-0 lg:top-1 ${
-                  j.hero ? 'h-3.5 w-3.5 bg-signal ring-4 ring-signal/20' : j.founder ? 'h-3 w-3 bg-signal' : 'h-3 w-3 bg-ink'
+                  j.hero ? 'h-3.5 w-3.5 bg-signal ring-4 ring-signal/20' : 'h-3 w-3 bg-ink'
                 }`}
               />
               <div
                 className={`h-full rounded-lg p-3 ${
-                  j.hero ? 'border-2 border-ink bg-white' : j.founder ? 'border border-signal/40 bg-white' : 'border border-ink/10 bg-white/80'
+                  j.hero ? 'border-2 border-ink bg-white' : 'border border-ink/10 bg-white/80'
                 }`}
               >
-                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink2">
-                  <span className="text-signal">{j.kicker}</span> · {j.when}
-                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink2">{j.when}</p>
                 <h3 className="mt-1 font-display text-base font-semibold leading-snug">
                   {j.role}
                   {j.hero && (
                     <span className="ml-1.5 rounded-full bg-ink px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-paper">CEO</span>
-                  )}
-                  {j.founder && (
-                    <span className="ml-1.5 rounded-full bg-signal px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-white">Founder</span>
                   )}
                 </h3>
                 <p className="text-xs font-semibold">{j.org}</p>
