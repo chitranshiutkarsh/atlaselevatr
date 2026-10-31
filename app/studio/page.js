@@ -22,7 +22,7 @@ const JOURNEY = [
     kicker: 'The top job',
     role: 'CEO',
     org: 'Savart',
-    note: 'Ran a wealthtech end to end: product, growth, research and the team. Built the product everyday investors use to pick stocks and funds that fit them, and opened new lines of business.',
+    note: 'Ran a wealthtech end to end: product, growth, research and the team, and opened new lines of business.',
     hero: true,
   },
   {
@@ -30,7 +30,7 @@ const JOURNEY = [
     kicker: 'Right hand to the CEO',
     role: 'Chief of Staff',
     org: "CEO's Office, DSCI (NASSCOM)",
-    note: 'Strategy, planning and new initiatives at India’s cybersecurity industry body, working closely with early-stage startups.',
+    note: 'Strategy, planning and new initiatives at India’s cybersecurity industry body.',
   },
   {
     when: '2024 – 2025',
@@ -44,7 +44,7 @@ const JOURNEY = [
     kicker: 'Building at scale',
     role: 'Product & CTO Office',
     org: 'Nykaa',
-    note: 'Owned Cart & Checkout, led payment-security certification, worked with the CTO office and shipped the first version of Nykaa Now.',
+    note: 'Owned Cart & Checkout, led payment-security certification and shipped the first Nykaa Now.',
   },
   {
     when: '2021',
@@ -58,7 +58,7 @@ const JOURNEY = [
     kicker: 'Zero to one',
     role: 'First product hire',
     org: 'Lido Learning',
-    note: 'Joined a K-12 ed-tech startup in the founder’s office and built its tutor platform from scratch.',
+    note: 'Built a K-12 ed-tech startup’s tutor platform from scratch.',
   },
   {
     when: '2017 – 2019',
@@ -92,125 +92,91 @@ export default async function StudioPage({ searchParams }) {
 
   return (
     <div className="pt-12">
-      {/* Intro */}
-      <section className="relative overflow-hidden rounded-2xl bg-ink px-6 py-10 text-paper sm:px-10">
+      {/* Intro + journey share one screen */}
+      <section className="relative overflow-hidden rounded-2xl bg-ink px-5 py-6 text-paper sm:px-8">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-signal/25 blur-3xl"
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-signal/25 blur-3xl"
         />
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/60">Studio · My story</p>
-        <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          1X Founder. <span className="italic text-signal">1X CEO.</span>
-        </h1>
-        <p className="mt-4 max-w-2xl text-paper/80">
-          I’m Utkarsh Chitranshi. I’ve started a company and I’ve run one. Along the way I’ve built products, opened
-          markets and sat beside the people making the calls. Atlas is my passion project: a map of the problems worth
-          building for.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {ARENAS.map((a) => (
-            <span key={a} className="rounded-full border border-paper/25 px-3 py-1 text-xs font-medium text-paper/85">
-              {a}
-            </span>
-          ))}
-        </div>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="btn bg-signal text-white hover:bg-paper hover:text-ink">
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/60">Studio · My story</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              1X Founder. <span className="italic text-signal">1X CEO.</span>
+            </h1>
+            <p className="mt-2 text-sm text-paper/80 sm:text-base">
+              I’m Utkarsh Chitranshi. I’ve started a company and run one, built products and opened markets. Atlas is
+              my passion project: a map of the problems worth building for.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {ARENAS.map((a) => (
+                <span key={a} className="rounded-full border border-paper/25 px-2.5 py-0.5 text-[11px] text-paper/85">
+                  {a}
+                </span>
+              ))}
+            </div>
+          </div>
+          <a
+            href={LINKEDIN}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn shrink-0 self-start bg-signal text-white hover:bg-paper hover:text-ink md:self-auto"
+          >
             Connect on LinkedIn ↗
           </a>
-          <a href="#journey" className="btn border border-paper/30 text-paper hover:border-paper">
-            Follow the journey ↓
-          </a>
         </div>
       </section>
 
-      {/* Journey: a winding road, latest stop at the top */}
-      <section id="journey" className="mt-14 scroll-mt-24">
-        <p className="label">The journey</p>
-        <h2 className="mt-1 font-display text-2xl font-semibold sm:text-3xl">Every stop, from today back to day one</h2>
-
-        <div className="relative mt-10">
-          {/* The road */}
-          <div
-            aria-hidden="true"
-            className="absolute bottom-0 left-4 top-0 w-0.5 bg-gradient-to-b from-signal via-ink/30 to-ink/10 md:left-1/2 md:-translate-x-1/2"
-          />
-          <p className="relative mb-8 ml-12 font-mono text-[11px] uppercase tracking-[0.16em] text-signal md:ml-0 md:text-center">
-            ● You are here
-          </p>
-
-          <ol className="space-y-10">
-            {JOURNEY.map((j, i) => {
-              const right = i % 2 === 1;
-              return (
-                <li key={`${j.when}-${j.org}`} className="relative md:grid md:grid-cols-2 md:gap-12">
-                  {/* Stop marker */}
-                  <span
-                    aria-hidden="true"
-                    className={`absolute left-4 top-5 flex -translate-x-1/2 items-center justify-center rounded-full border-4 border-paper md:left-1/2 ${
-                      j.hero ? 'h-6 w-6 bg-signal ring-4 ring-signal/20' : j.founder ? 'h-5 w-5 bg-signal' : 'h-4 w-4 bg-ink'
-                    }`}
-                  />
-                  {/* Year on the other side of the road (desktop) */}
-                  <p
-                    className={`hidden pt-4 font-mono text-xs uppercase tracking-[0.14em] text-ink2 md:block ${
-                      right ? 'md:order-1 md:text-right' : 'md:order-2'
-                    }`}
-                  >
-                    {j.when}
-                  </p>
-                  <div className={`ml-12 md:ml-0 ${right ? 'md:order-2' : 'md:order-1'}`}>
-                    <div
-                      className={`rounded-xl p-5 ${
-                        j.hero ? 'border-2 border-ink bg-white shadow-sm' : 'border border-ink/10 bg-white/80'
-                      } ${right ? '' : 'md:text-right'}`}
-                    >
-                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-signal">
-                        {j.kicker}
-                        <span className="text-ink2 md:hidden"> · {j.when}</span>
-                      </p>
-                      <h3 className="mt-1 font-display text-xl font-semibold leading-snug">
-                        {j.role}
-                        {j.founder && (
-                          <span className="ml-2 rounded-full bg-signal px-2 py-0.5 align-middle font-mono text-[9px] uppercase tracking-wide text-white">
-                            Founder
-                          </span>
-                        )}
-                        {j.hero && (
-                          <span className="ml-2 rounded-full bg-ink px-2 py-0.5 align-middle font-mono text-[9px] uppercase tracking-wide text-paper">
-                            CEO
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-sm font-semibold">{j.org}</p>
-                      <p className="mt-2 text-sm text-ink2">{j.note}</p>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-
-          <p className="relative mt-8 ml-12 font-mono text-[11px] uppercase tracking-[0.16em] text-ink2 md:ml-0 md:text-center">
-            ○ Where it all began
-          </p>
+      {/* Journey: a road of stops, today first. Four across on desktop, a tight line on mobile. */}
+      <section id="journey" className="mt-6 scroll-mt-24">
+        <div className="flex items-baseline justify-between">
+          <p className="label">The journey · today → day one</p>
+          <p className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink2 lg:block">Read left to right</p>
         </div>
-      </section>
 
-      {/* The thread */}
-      <section className="mt-16 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:items-center">
-        <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">
-          Find a real problem. <span className="italic text-signal">Then build.</span>
-        </p>
-        <p className="text-ink2">
-          A farm robot in college, a tutor platform from scratch, the checkout of a beauty giant, a company to run. The
-          thread is the same every time, and it’s why Atlas exists: so more people can find the problem that’s theirs
-          to solve, or join someone already solving it.
+        <ol className="relative mt-3 grid gap-x-3 gap-y-3 border-l-2 border-ink/15 pl-5 lg:grid-cols-4 lg:gap-y-6 lg:border-l-0 lg:pl-0">
+          {JOURNEY.map((j) => (
+            <li key={`${j.when}-${j.org}`} className="relative lg:pt-5">
+              {/* road segment + stop (desktop) */}
+              <span aria-hidden="true" className="absolute left-0 right-[-0.75rem] top-[9px] hidden h-0.5 bg-ink/15 lg:block" />
+              <span
+                aria-hidden="true"
+                className={`absolute -left-[27px] top-3.5 rounded-full border-2 border-paper lg:left-0 lg:top-1 ${
+                  j.hero ? 'h-3.5 w-3.5 bg-signal ring-4 ring-signal/20' : j.founder ? 'h-3 w-3 bg-signal' : 'h-3 w-3 bg-ink'
+                }`}
+              />
+              <div
+                className={`h-full rounded-lg p-3 ${
+                  j.hero ? 'border-2 border-ink bg-white' : j.founder ? 'border border-signal/40 bg-white' : 'border border-ink/10 bg-white/80'
+                }`}
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink2">
+                  <span className="text-signal">{j.kicker}</span> · {j.when}
+                </p>
+                <h3 className="mt-1 font-display text-base font-semibold leading-snug">
+                  {j.role}
+                  {j.hero && (
+                    <span className="ml-1.5 rounded-full bg-ink px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-paper">CEO</span>
+                  )}
+                  {j.founder && (
+                    <span className="ml-1.5 rounded-full bg-signal px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-white">Founder</span>
+                  )}
+                </h3>
+                <p className="text-xs font-semibold">{j.org}</p>
+                <p className="mt-1 text-xs leading-relaxed text-ink2">{j.note}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-4 text-sm text-ink2">
+          <span className="font-semibold text-ink">The thread:</span> find a real problem, then build. That’s why Atlas
+          exists, so more people can find the problem that’s theirs to solve, or join someone already solving it.
         </p>
       </section>
 
       {builders && (
-        <section id="builders" className="mt-14 scroll-mt-24">
+        <section id="builders" className="mt-10 scroll-mt-24">
           <p className="label">Builders board</p>
           <h2 className="mt-1 font-display text-2xl font-semibold">People building on Atlas</h2>
           <p className="mt-2 max-w-2xl text-ink2">
@@ -269,7 +235,7 @@ export default async function StudioPage({ searchParams }) {
         </section>
       )}
 
-      <section className="card mt-14 flex flex-col items-start gap-5 p-8 md:flex-row md:items-center md:justify-between">
+      <section className="card mt-10 flex flex-col items-start gap-5 p-8 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="font-display text-2xl font-semibold">Seen a problem worth solving?</h2>
           <p className="mt-1 text-ink2">Add it to Atlas, or say hello on LinkedIn.</p>
