@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import OrgLogo from '@/components/OrgLogo';
 import { listBuilderBoard } from '@/lib/queries';
 import { BUILDER_STAGES, BUILDER_NEEDS } from '@/lib/constants';
 import { prettyName } from '@/lib/geo';
@@ -15,66 +16,20 @@ const LINKEDIN = 'https://www.linkedin.com/in/utkarshchitranshi/';
 
 const label = (list, key) => list.find(([k]) => k === key)?.[1] || key;
 
-// Latest first: the story starts at the top job and runs back to the start.
-const JOURNEY = [
-  {
-    when: '2026',
-    kicker: 'The top job',
-    role: 'CEO',
-    org: 'Savart',
-    note: 'Ran a wealthtech end to end: product, growth, research and the team, and opened new lines of business.',
-    hero: true,
-  },
-  {
-    when: '2025',
-    kicker: 'Right hand to the CEO',
-    role: 'Chief of Staff',
-    org: "CEO's Office, DSCI (NASSCOM)",
-    note: 'Strategy, planning and new initiatives at India’s cybersecurity industry body.',
-  },
-  {
-    when: '2024 – 2025',
-    kicker: 'Sharpening the saw',
-    role: 'MBA',
-    org: 'SPJIMR Mumbai · INSEAD, France',
-    note: 'Business analytics and global strategy. Led the product management club.',
-  },
-  {
-    when: '2022 – 2023',
-    kicker: 'Building at scale',
-    role: 'Product & CTO Office',
-    org: 'Nykaa',
-    note: 'Owned Cart & Checkout, led payment-security certification and shipped the first Nykaa Now.',
-  },
-  {
-    when: '2021',
-    kicker: 'Going global',
-    role: "Founder's Office",
-    org: 'English Quest',
-    note: 'Took an ed-tech app into Vietnam and Korea and helped raise the seed round.',
-  },
-  {
-    when: '2019 – 2022',
-    kicker: 'Zero to one',
-    role: 'First product hire',
-    org: 'Lido Learning',
-    note: 'Built a K-12 ed-tech startup’s tutor platform from scratch.',
-  },
-  {
-    when: '2017 – 2019',
-    kicker: 'Where it started',
-    role: 'Co-founder',
-    org: 'Care4Plants',
-    note: 'Built a LiDAR farm robot in college, won Government of India research funding and was granted a patent.',
-    founder: true,
-  },
-  {
-    when: '2016 – 2020',
-    kicker: 'The foundation',
-    role: 'B.Tech, Computer Science',
-    org: 'Punjab Technical University',
-    note: 'Engineering, an IEEE paper and a Wiley book chapter on blockchain.',
-  },
+// Latest first. Kept short on purpose: logo, role, company, years.
+const EXPERIENCE = [
+  { role: 'CEO', org: 'Savart', domain: 'savart.com', when: '2026', hero: true },
+  { role: 'Chief of Staff, CEO’s Office', org: 'DSCI (NASSCOM)', domain: 'dsci.in', when: '2025' },
+  { role: 'Product → CTO Office', org: 'Nykaa', domain: 'nykaa.com', when: '2022 – 2023' },
+  { role: 'Founder’s Office', org: 'English Quest', domain: 'theenglishquest.com', when: '2021' },
+  { role: 'First product hire', org: 'Lido Learning', domain: 'lidolearning.com', when: '2019 – 2022' },
+  { role: 'Co-founder', org: 'Care4Plants', domain: null, when: '2017 – 2019' },
+];
+
+// Bottom to top: engineering first, then the MBA.
+const EDUCATION = [
+  { degree: 'MBA', org: 'SPJIMR Mumbai', domain: 'spjimr.org', extra: { org: 'INSEAD, France', domain: 'insead.edu' }, when: '2024 – 2025' },
+  { degree: 'B.Tech, Computer Science', org: 'CGC College of Engineering', domain: 'cgc.edu.in', when: '2016 – 2020' },
 ];
 
 // Proof points, from LinkedIn and the papers themselves.
@@ -161,47 +116,54 @@ export default async function StudioPage({ searchParams }) {
         })}
       </ul>
 
-      {/* Journey: a road of stops, today first. Four across on desktop, a tight line on mobile. */}
-      <section id="journey" className="mt-6 scroll-mt-24">
-        <div className="flex items-baseline justify-between">
-          <p className="label">The journey · today → day one</p>
-          <p className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink2 lg:block">Read left to right</p>
+      {/* Journey: experience (bigger) and education side by side */}
+      <section id="journey" className="mt-6 grid scroll-mt-24 gap-3 lg:grid-cols-3">
+        <div className="rounded-xl border border-ink/10 bg-white/80 p-4 sm:p-5 lg:col-span-2">
+          <p className="label">Experience</p>
+          <ol className="relative mt-3">
+            <span aria-hidden="true" className="absolute bottom-5 left-5 top-5 w-px bg-ink/15" />
+            {EXPERIENCE.map((e) => (
+              <li key={e.org} className="relative flex items-center gap-3 py-2">
+                <OrgLogo domain={e.domain} name={e.org} size={40} />
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-base font-semibold leading-tight">
+                    {e.role}
+                    {e.hero && (
+                      <span className="ml-2 rounded-full bg-ink px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-paper">Latest</span>
+                    )}
+                  </p>
+                  <p className="text-sm text-ink2">{e.org}</p>
+                </div>
+                <p className="shrink-0 font-mono text-[11px] text-ink2">{e.when}</p>
+              </li>
+            ))}
+          </ol>
         </div>
 
-        <ol className="relative mt-3 grid gap-x-3 gap-y-3 border-l-2 border-ink/15 pl-5 lg:grid-cols-4 lg:gap-y-6 lg:border-l-0 lg:pl-0">
-          {JOURNEY.map((j) => (
-            <li key={`${j.when}-${j.org}`} className="relative lg:pt-5">
-              {/* road segment + stop (desktop) */}
-              <span aria-hidden="true" className="absolute left-0 right-[-0.75rem] top-[9px] hidden h-0.5 bg-ink/15 lg:block" />
-              <span
-                aria-hidden="true"
-                className={`absolute -left-[27px] top-3.5 rounded-full border-2 border-paper lg:left-0 lg:top-1 ${
-                  j.hero ? 'h-3.5 w-3.5 bg-signal ring-4 ring-signal/20' : 'h-3 w-3 bg-ink'
-                }`}
-              />
-              <div
-                className={`h-full rounded-lg p-3 ${
-                  j.hero ? 'border-2 border-ink bg-white' : 'border border-ink/10 bg-white/80'
-                }`}
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink2">{j.when}</p>
-                <h3 className="mt-1 font-display text-base font-semibold leading-snug">
-                  {j.role}
-                  {j.hero && (
-                    <span className="ml-1.5 rounded-full bg-ink px-1.5 py-0.5 align-middle font-mono text-[8px] uppercase text-paper">CEO</span>
-                  )}
-                </h3>
-                <p className="text-xs font-semibold">{j.org}</p>
-                <p className="mt-1 text-xs leading-relaxed text-ink2">{j.note}</p>
+        <div className="rounded-xl border border-ink/10 bg-white/80 p-4 sm:p-5">
+          <p className="label">Education</p>
+          <div className="mt-3 flex flex-col items-stretch">
+            {EDUCATION.map((ed, i) => (
+              <div key={ed.degree}>
+                {i > 0 && (
+                  <p aria-hidden="true" className="py-1 text-center text-xl leading-none text-ink2">↑</p>
+                )}
+                <div className="rounded-lg border border-ink/10 bg-paper/60 p-3">
+                  <div className="flex items-center gap-2">
+                    <OrgLogo domain={ed.domain} name={ed.org} size={36} />
+                    {ed.extra && <OrgLogo domain={ed.extra.domain} name={ed.extra.org} size={36} />}
+                  </div>
+                  <p className="mt-2 font-display text-base font-semibold leading-tight">{ed.degree}</p>
+                  <p className="text-sm text-ink2">
+                    {ed.org}
+                    {ed.extra ? ` · ${ed.extra.org}` : ''}
+                  </p>
+                  <p className="mt-0.5 font-mono text-[11px] text-ink2">{ed.when}</p>
+                </div>
               </div>
-            </li>
-          ))}
-        </ol>
-
-        <p className="mt-4 text-sm text-ink2">
-          <span className="font-semibold text-ink">The thread:</span> find a real problem, then build. That’s why Atlas
-          exists, so more people can find the problem that’s theirs to solve, or join someone already solving it.
-        </p>
+            ))}
+          </div>
+        </div>
       </section>
 
       {builders && (
