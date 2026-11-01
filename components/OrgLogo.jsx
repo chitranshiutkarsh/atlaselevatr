@@ -25,7 +25,7 @@ export default function OrgLogo({ src, name, size = 40, wide }) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className={`h-full w-full object-contain ${ratio === 1 ? '' : 'px-1.5 py-1'}`}
+          className={`h-full w-full object-contain ${src && src.startsWith('/logos/') ? '' : 'p-1'}`}
         />
       )}
     </span>

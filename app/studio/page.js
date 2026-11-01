@@ -148,7 +148,7 @@ export default async function StudioPage({ searchParams }) {
             
             {EXPERIENCE.map((e) => (
               <li key={e.org} className="relative flex items-center gap-3 py-2">
-                <span className="flex w-[106px] shrink-0 justify-center"><OrgLogo src={e.logo} name={e.org} size={44} /></span>
+                <OrgLogo src={e.logo} name={e.org} size={48} wide={1} />
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-base font-semibold leading-tight">
                     {e.role}
@@ -167,7 +167,7 @@ export default async function StudioPage({ searchParams }) {
           <ul className="mt-2 grid gap-x-4 gap-y-2 sm:grid-cols-2">
             {INTERNSHIPS.map((n) => (
               <li key={n.org} className="flex items-center gap-2.5">
-                <span className="flex w-[106px] shrink-0 justify-center"><OrgLogo src={n.logo} name={n.org} size={36} /></span>
+                <OrgLogo src={n.logo} name={n.org} size={40} wide={1} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold leading-tight">{n.role}</p>
                   <p className="text-xs text-ink2">
