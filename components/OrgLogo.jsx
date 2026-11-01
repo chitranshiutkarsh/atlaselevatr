@@ -2,26 +2,21 @@
 
 import { useState } from 'react';
 
-// An organisation's official logo (from its own file or Wikimedia), or its initials
+// An organisation's official logo (from its own file or Wikimedia), or its name
 // in a neat tile when no official logo file is available.
 // Tiles are wide so wordmark logos (Nykaa, INSEAD, SPJIMR) stay readable.
-export default function OrgLogo({ src, name, size = 40, wide = 2.4 }) {
+export default function OrgLogo({ src, name, size = 40, wide }) {
   const [failed, setFailed] = useState(!src);
-  const initials = name
-    .replace(/[()]/g, '')
-    .split(/\s+/)
-    .filter((w) => /^[A-Za-z0-9]/.test(w))
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('');
+  // Square logo files (from LinkedIn) get square tiles; wordmarks get wide ones.
+  const ratio = wide ?? (src && src.startsWith('/logos/') ? 1 : 2.4);
   return (
     <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink/10 ${failed ? 'bg-ink' : 'bg-white'}`}
-      style={{ width: Math.round(size * wide), height: size }}
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink/10 bg-white"
+      style={{ width: Math.round(size * ratio), height: size }}
       title={name}
     >
       {failed ? (
-        <span className="font-display text-xs font-semibold tracking-wide text-paper">{initials}</span>
+        <span className="px-1.5 text-center font-display text-[11px] font-semibold leading-tight text-ink">{name.replace(/\s*\(.*\)/, '')}</span>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -30,7 +25,7 @@ export default function OrgLogo({ src, name, size = 40, wide = 2.4 }) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className="h-full w-full object-contain px-1.5 py-1"
+          className={`h-full w-full object-contain ${ratio === 1 ? '' : 'px-1.5 py-1'}`}
         />
       )}
     </span>

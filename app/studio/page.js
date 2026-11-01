@@ -16,40 +16,38 @@ const LINKEDIN = 'https://www.linkedin.com/in/utkarshchitranshi/';
 
 const label = (list, key) => list.find(([k]) => k === key)?.[1] || key;
 
-// Official logos: Wikimedia files where they exist. To use your own file instead,
-// drop it in /public/logos and point `logo` at '/logos/<file>'.
+// Official logos. Company and school logos saved from their LinkedIn pages live in
+// /public/logos; the rest come from Wikimedia.
 const wm = (file, wiki = 'commons.wikimedia.org') => `https://${wiki}/wiki/Special:FilePath/${file}?width=320`;
 const LOGOS = {
-  savart: '/logos/savart.png',
+  savart: '/logos/savart.jpg',
+  elevatr: '/logos/elevatr.jpg',
   dsci: wm('Data_Security_Council_of_India_logo.jpg', 'en.wikipedia.org'),
-  nykaa: wm('Nykaa_New_Logo.svg'),
-  englishQuest: '/logos/english-quest.png',
-  lido: '/logos/lido-learning.png',
-  care4plants: '/logos/care4plants.png',
+  nykaa: '/logos/nykaa.jpg',
+  englishQuest: '/logos/english-quest.jpg',
+  lido: '/logos/lido-learning.jpg',
+  care4plants: '/logos/care4plants.jpg',
   iitd: wm('Indian_Institute_of_Technology_Delhi_Logo.svg', 'en.wikipedia.org'),
   thapar: wm('Thapar_Logo.png'),
-  adept: '/logos/adept-digital.png',
-  politicalWave: '/logos/political-wave.png',
   spjimr: wm('SPJIMR_Logo_2025.png'),
-  insead: wm('INSEAD_Strapline_Logo.svg', 'en.wikipedia.org'),
-  cgc: '/logos/cgc.png',
+  insead: '/logos/insead.jpg',
+  cgc: '/logos/cgc.jpg',
 };
 
-// Latest first. Kept short on purpose: logo, role, company, years.
+// Latest first, as on LinkedIn. Kept short on purpose: logo, role, company, years.
 const EXPERIENCE = [
   { role: 'CEO', org: 'Savart', logo: LOGOS.savart, when: '2026', hero: true },
-  { role: 'Chief of Staff, CEO’s Office', org: 'DSCI (NASSCOM)', logo: LOGOS.dsci, when: '2025' },
-  { role: 'Product → CTO Office', org: 'Nykaa', logo: LOGOS.nykaa, when: '2022 – 2023' },
-  { role: 'Founder’s Office', org: 'English Quest', logo: LOGOS.englishQuest, when: '2021' },
-  { role: 'First product hire', org: 'Lido Learning', logo: LOGOS.lido, when: '2019 – 2022' },
-  { role: 'Co-founder', org: 'Care4Plants', logo: LOGOS.care4plants, when: '2017 – 2019' },
+  { role: 'Founder', org: 'Elevatr Ventures', logo: LOGOS.elevatr, when: '2025' },
+  { role: 'Strategy & Planning, CEO’s Office', org: 'DSCI (NASSCOM)', logo: LOGOS.dsci, when: '2025' },
+  { role: 'Technical Programs & Strategy', org: 'Nykaa', logo: LOGOS.nykaa, when: '2022 – 2024' },
+  { role: 'Partnerships & Investor Relations', org: 'English Quest', logo: LOGOS.englishQuest, when: '2021' },
+  { role: 'Marketing → Product', org: 'Lido Learning', logo: LOGOS.lido, when: '2019 – 2022' },
+  { role: 'Co-founder', org: 'Care4Plants', logo: LOGOS.care4plants, when: '2016 – 2019' },
 ];
 
 const INTERNSHIPS = [
-  { role: 'Blockchain research', org: 'IIT Delhi', logo: LOGOS.iitd, when: '2019' },
-  { role: 'Political campaign planning', org: 'Political Wave Group', logo: LOGOS.politicalWave, when: '2019' },
-  { role: 'Analytics intern', org: 'Adept Digital', logo: LOGOS.adept, when: '2018' },
-  { role: 'Machine learning trainee', org: 'Thapar Institute', logo: LOGOS.thapar, when: '2018' },
+  { role: 'Summer Intern, Blockchain', org: 'IIT Delhi', logo: LOGOS.iitd, when: '2018' },
+  { role: 'Trainee, ML & AI', org: 'Thapar Institute', logo: LOGOS.thapar, when: '2017' },
 ];
 
 // Bottom to top: engineering first, then the MBA.
@@ -150,7 +148,7 @@ export default async function StudioPage({ searchParams }) {
             
             {EXPERIENCE.map((e) => (
               <li key={e.org} className="relative flex items-center gap-3 py-2">
-                <OrgLogo src={e.logo} name={e.org} size={40} />
+                <OrgLogo src={e.logo} name={e.org} size={44} />
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-base font-semibold leading-tight">
                     {e.role}
@@ -169,7 +167,7 @@ export default async function StudioPage({ searchParams }) {
           <ul className="mt-2 grid gap-x-4 gap-y-2 sm:grid-cols-2">
             {INTERNSHIPS.map((n) => (
               <li key={n.org} className="flex items-center gap-2.5">
-                <OrgLogo src={n.logo} name={n.org} size={32} />
+                <OrgLogo src={n.logo} name={n.org} size={36} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold leading-tight">{n.role}</p>
                   <p className="text-xs text-ink2">
@@ -191,8 +189,8 @@ export default async function StudioPage({ searchParams }) {
                 )}
                 <div className="rounded-lg border border-ink/10 bg-paper/60 p-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <OrgLogo src={ed.logo} name={ed.org} size={36} />
-                    {ed.extra && <OrgLogo src={ed.extra.logo} name={ed.extra.org} size={36} />}
+                    <OrgLogo src={ed.logo} name={ed.org} size={48} />
+                    {ed.extra && <OrgLogo src={ed.extra.logo} name={ed.extra.org} size={48} />}
                   </div>
                   <p className="mt-2 font-display text-base font-semibold leading-tight">{ed.degree}</p>
                   <p className="text-sm text-ink2">
