@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 // An organisation's official logo (from its own file or Wikimedia), or its initials
 // in a neat tile when no official logo file is available.
-export default function OrgLogo({ src, name, size = 40 }) {
+// Tiles are wide so wordmark logos (Nykaa, INSEAD, SPJIMR) stay readable.
+export default function OrgLogo({ src, name, size = 40, wide = 2.4 }) {
   const [failed, setFailed] = useState(!src);
   const initials = name
     .replace(/[()]/g, '')
@@ -16,7 +17,7 @@ export default function OrgLogo({ src, name, size = 40 }) {
   return (
     <span
       className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-ink/10 ${failed ? 'bg-ink' : 'bg-white'}`}
-      style={{ width: size, height: size }}
+      style={{ width: Math.round(size * wide), height: size }}
       title={name}
     >
       {failed ? (
@@ -29,7 +30,7 @@ export default function OrgLogo({ src, name, size = 40 }) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className="h-full w-full object-contain p-1"
+          className="h-full w-full object-contain px-1.5 py-1"
         />
       )}
     </span>

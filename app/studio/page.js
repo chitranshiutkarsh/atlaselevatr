@@ -18,7 +18,7 @@ const label = (list, key) => list.find(([k]) => k === key)?.[1] || key;
 
 // Official logos: Wikimedia files where they exist. To use your own file instead,
 // drop it in /public/logos and point `logo` at '/logos/<file>'.
-const wm = (file, wiki = 'commons.wikimedia.org') => `https://${wiki}/wiki/Special:FilePath/${file}?width=160`;
+const wm = (file, wiki = 'commons.wikimedia.org') => `https://${wiki}/wiki/Special:FilePath/${file}?width=320`;
 const LOGOS = {
   savart: '/logos/savart.png',
   dsci: wm('Data_Security_Council_of_India_logo.jpg', 'en.wikipedia.org'),
@@ -31,7 +31,7 @@ const LOGOS = {
   adept: '/logos/adept-digital.png',
   politicalWave: '/logos/political-wave.png',
   spjimr: wm('SPJIMR_Logo_2025.png'),
-  insead: wm('Logo_Insead.svg'),
+  insead: wm('INSEAD_Strapline_Logo.svg', 'en.wikipedia.org'),
   cgc: '/logos/cgc.png',
 };
 
@@ -147,7 +147,7 @@ export default async function StudioPage({ searchParams }) {
         <div className="rounded-xl border border-ink/10 bg-white/80 p-4 sm:p-5 lg:col-span-2">
           <p className="label">Experience</p>
           <ol className="relative mt-3">
-            <span aria-hidden="true" className="absolute bottom-5 left-5 top-5 w-px bg-ink/15" />
+            
             {EXPERIENCE.map((e) => (
               <li key={e.org} className="relative flex items-center gap-3 py-2">
                 <OrgLogo src={e.logo} name={e.org} size={40} />
@@ -190,7 +190,7 @@ export default async function StudioPage({ searchParams }) {
                   <p aria-hidden="true" className="py-1 text-center text-xl leading-none text-ink2">↑</p>
                 )}
                 <div className="rounded-lg border border-ink/10 bg-paper/60 p-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <OrgLogo src={ed.logo} name={ed.org} size={36} />
                     {ed.extra && <OrgLogo src={ed.extra.logo} name={ed.extra.org} size={36} />}
                   </div>
