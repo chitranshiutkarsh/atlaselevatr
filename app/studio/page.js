@@ -16,20 +16,46 @@ const LINKEDIN = 'https://www.linkedin.com/in/utkarshchitranshi/';
 
 const label = (list, key) => list.find(([k]) => k === key)?.[1] || key;
 
+// Official logos: Wikimedia files where they exist. To use your own file instead,
+// drop it in /public/logos and point `logo` at '/logos/<file>'.
+const wm = (file, wiki = 'commons.wikimedia.org') => `https://${wiki}/wiki/Special:FilePath/${file}?width=160`;
+const LOGOS = {
+  savart: '/logos/savart.png',
+  dsci: wm('Data_Security_Council_of_India_logo.jpg', 'en.wikipedia.org'),
+  nykaa: wm('Nykaa_New_Logo.svg'),
+  englishQuest: '/logos/english-quest.png',
+  lido: '/logos/lido-learning.png',
+  care4plants: '/logos/care4plants.png',
+  iitd: wm('Indian_Institute_of_Technology_Delhi_Logo.svg', 'en.wikipedia.org'),
+  thapar: wm('Thapar_Logo.png'),
+  adept: '/logos/adept-digital.png',
+  politicalWave: '/logos/political-wave.png',
+  spjimr: wm('SPJIMR_Logo_2025.png'),
+  insead: wm('Logo_Insead.svg'),
+  cgc: '/logos/cgc.png',
+};
+
 // Latest first. Kept short on purpose: logo, role, company, years.
 const EXPERIENCE = [
-  { role: 'CEO', org: 'Savart', domain: 'savart.com', when: '2026', hero: true },
-  { role: 'Chief of Staff, CEO’s Office', org: 'DSCI (NASSCOM)', domain: 'dsci.in', when: '2025' },
-  { role: 'Product → CTO Office', org: 'Nykaa', domain: 'nykaa.com', when: '2022 – 2023' },
-  { role: 'Founder’s Office', org: 'English Quest', domain: 'theenglishquest.com', when: '2021' },
-  { role: 'First product hire', org: 'Lido Learning', domain: 'lidolearning.com', when: '2019 – 2022' },
-  { role: 'Co-founder', org: 'Care4Plants', domain: null, when: '2017 – 2019' },
+  { role: 'CEO', org: 'Savart', logo: LOGOS.savart, when: '2026', hero: true },
+  { role: 'Chief of Staff, CEO’s Office', org: 'DSCI (NASSCOM)', logo: LOGOS.dsci, when: '2025' },
+  { role: 'Product → CTO Office', org: 'Nykaa', logo: LOGOS.nykaa, when: '2022 – 2023' },
+  { role: 'Founder’s Office', org: 'English Quest', logo: LOGOS.englishQuest, when: '2021' },
+  { role: 'First product hire', org: 'Lido Learning', logo: LOGOS.lido, when: '2019 – 2022' },
+  { role: 'Co-founder', org: 'Care4Plants', logo: LOGOS.care4plants, when: '2017 – 2019' },
+];
+
+const INTERNSHIPS = [
+  { role: 'Blockchain research', org: 'IIT Delhi', logo: LOGOS.iitd, when: '2019' },
+  { role: 'Political campaign planning', org: 'Political Wave Group', logo: LOGOS.politicalWave, when: '2019' },
+  { role: 'Analytics intern', org: 'Adept Digital', logo: LOGOS.adept, when: '2018' },
+  { role: 'Machine learning trainee', org: 'Thapar Institute', logo: LOGOS.thapar, when: '2018' },
 ];
 
 // Bottom to top: engineering first, then the MBA.
 const EDUCATION = [
-  { degree: 'MBA', org: 'SPJIMR Mumbai', domain: 'spjimr.org', extra: { org: 'INSEAD, France', domain: 'insead.edu' }, when: '2024 – 2025' },
-  { degree: 'B.Tech, Computer Science', org: 'CGC College of Engineering', domain: 'cgc.edu.in', when: '2016 – 2020' },
+  { degree: 'MBA', org: 'SPJIMR Mumbai', logo: LOGOS.spjimr, extra: { org: 'INSEAD, France', logo: LOGOS.insead }, when: '2024 – 2025' },
+  { degree: 'B.Tech, Computer Science', org: 'CGC College of Engineering', logo: LOGOS.cgc, when: '2016 – 2020' },
 ];
 
 // Proof points, from LinkedIn and the papers themselves.
@@ -124,7 +150,7 @@ export default async function StudioPage({ searchParams }) {
             <span aria-hidden="true" className="absolute bottom-5 left-5 top-5 w-px bg-ink/15" />
             {EXPERIENCE.map((e) => (
               <li key={e.org} className="relative flex items-center gap-3 py-2">
-                <OrgLogo domain={e.domain} name={e.org} size={40} />
+                <OrgLogo src={e.logo} name={e.org} size={40} />
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-base font-semibold leading-tight">
                     {e.role}
@@ -138,6 +164,21 @@ export default async function StudioPage({ searchParams }) {
               </li>
             ))}
           </ol>
+
+          <p className="label mt-4 border-t border-ink/10 pt-3">Internships</p>
+          <ul className="mt-2 grid gap-x-4 gap-y-2 sm:grid-cols-2">
+            {INTERNSHIPS.map((n) => (
+              <li key={n.org} className="flex items-center gap-2.5">
+                <OrgLogo src={n.logo} name={n.org} size={32} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold leading-tight">{n.role}</p>
+                  <p className="text-xs text-ink2">
+                    {n.org} · {n.when}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="rounded-xl border border-ink/10 bg-white/80 p-4 sm:p-5">
@@ -150,8 +191,8 @@ export default async function StudioPage({ searchParams }) {
                 )}
                 <div className="rounded-lg border border-ink/10 bg-paper/60 p-3">
                   <div className="flex items-center gap-2">
-                    <OrgLogo domain={ed.domain} name={ed.org} size={36} />
-                    {ed.extra && <OrgLogo domain={ed.extra.domain} name={ed.extra.org} size={36} />}
+                    <OrgLogo src={ed.logo} name={ed.org} size={36} />
+                    {ed.extra && <OrgLogo src={ed.extra.logo} name={ed.extra.org} size={36} />}
                   </div>
                   <p className="mt-2 font-display text-base font-semibold leading-tight">{ed.degree}</p>
                   <p className="text-sm text-ink2">
