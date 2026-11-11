@@ -21,7 +21,7 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '', industry: '', problem_id: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], careers = { review: [], live: [], stats: {} } }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], careers = { review: [], live: [], links: [], stats: {} } }) {
   const router = useRouter();
   const newLeads = leads.filter((l) => l.status === 'new').length;
   const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
@@ -90,7 +90,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
       </div>
       {msg && <p className="mt-4 rounded-lg bg-paper2 px-4 py-2 text-sm">{msg}</p>}
 
-      {tab === 'careers' && <AdminCareers review={careers.review} live={careers.live} stats={careers.stats} />}
+      {tab === 'careers' && <AdminCareers review={careers.review} live={careers.live} links={careers.links} stats={careers.stats} />}
 
       {tab === 'jobs' && (
         <section className="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">

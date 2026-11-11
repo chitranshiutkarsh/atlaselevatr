@@ -17,7 +17,7 @@ async function call(url, method, body) {
 
 // Admin → Careers: review boards found automatically or sent by startups,
 // add a careers link by hand, and run the import.
-export default function AdminCareers({ review = [], live = [], stats = {} }) {
+export default function AdminCareers({ review = [], live = [], links = [], stats = {} }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -105,6 +105,47 @@ export default function AdminCareers({ review = [], live = [], stats = {} }) {
         <input className="input" placeholder="Careers link, e.g. https://jobs.lever.co/…" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} required />
         <button className="btn-primary" disabled={busy}>Add</button>
       </form>
+
+      <div>
+        <h2 className="font-display text-2xl font-semibold">Links to check ({links.filter((l) => !l.verdict).length})</h2>
+        <p className="mt-1 text-sm text-ink2">
+          Which problem each hiring startup&apos;s roles show up on. The matcher links them by shared words, so check the
+          ones that look off: Block hides the link from jobs; Confirm keeps it.
+        </p>
+        <ul className="mt-3 space-y-2">
+          {links.length === 0 && <li className="text-ink2">No links yet.</li>}
+          {links.map((l) => (
+            <li key={`${l.problem_id}-${l.company_id}`} className={`card flex flex-wrap items-center justify-between gap-3 p-4 ${l.verdict === 'block' ? 'opacity-60' : ''}`}>
+              <div className="min-w-0">
+                <p className="font-semibold">
+                  {l.name} <span className="font-normal text-ink2">→</span>{' '}
+                  <a href={`/problems/${l.problem_id}`} target="_blank" rel="noopener noreferrer" className="hover:text-signal">{l.title}</a>
+                </p>
+                <p className="font-mono text-[11px] uppercase text-ink2">
+                  {l.open_roles} roles · score {l.score}{l.verdict ? ` · ${l.verdict === 'block' ? 'blocked' : 'confirmed'}` : ''}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {l.verdict !== 'confirm' && (
+                  <button className="chip" disabled={busy} onClick={() => run(() => call('/api/admin/links', 'POST', { problem_id: l.problem_id, company_id: l.company_id, verdict: 'confirm' }), 'Link confirmed')}>
+                    Confirm
+                  </button>
+                )}
+                {l.verdict !== 'block' && (
+                  <button className="chip hover:border-signal hover:text-signal" disabled={busy} onClick={() => run(() => call('/api/admin/links', 'POST', { problem_id: l.problem_id, company_id: l.company_id, verdict: 'block' }), 'Link blocked')}>
+                    Block
+                  </button>
+                )}
+                {l.verdict && (
+                  <button className="chip" disabled={busy} onClick={() => run(() => call('/api/admin/links', 'POST', { problem_id: l.problem_id, company_id: l.company_id, verdict: 'clear' }), 'Back to automatic')}>
+                    Undo
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div>
         <h2 className="font-display text-2xl font-semibold">To review ({review.length})</h2>

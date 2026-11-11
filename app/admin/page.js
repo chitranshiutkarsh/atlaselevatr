@@ -44,7 +44,7 @@ export default async function AdminPage() {
         FROM intro_requests i JOIN builder_interests b ON b.id = i.builder_id JOIN problems p ON p.id = b.problem_id
         ORDER BY (i.status = 'new') DESC, i.created_at DESC LIMIT 200`,
     ]);
-    const [review, live, cstats, [lastRun]] = await Promise.all([
+    const [review, live, cstats, [lastRun], links] = await Promise.all([
       sql`SELECT b.company_id, b.ats, b.token, b.status, b.source, b.board_name, b.evidence, b.submitter, b.open_roles, b.last_error,
           c.name, c.country
         FROM careers_boards b JOIN companies c ON c.id = b.company_id
@@ -55,8 +55,17 @@ export default async function AdminPage() {
         WHERE b.status = 'verified' ORDER BY b.open_roles DESC, c.name LIMIT 300`,
       jobsStats(),
       sql`SELECT value FROM meta WHERE key = 'jobs_last_run'`,
+      // Problem→startup links behind the jobs people see, unchecked ones first.
+      sql`SELECT m.problem_id, m.company_id, p.title, c.name, round(m.score::numeric, 1)::float AS score, b.open_roles, lr.verdict
+        FROM problem_matches m
+        JOIN problems p ON p.id = m.problem_id AND p.status = 'live'
+        JOIN companies c ON c.id = m.company_id
+        JOIN careers_boards b ON b.company_id = m.company_id AND b.status = 'verified' AND b.open_roles > 0
+        LEFT JOIN link_reviews lr ON lr.problem_id = m.problem_id AND lr.company_id = m.company_id
+        WHERE m.strong OR lr.verdict IS NOT NULL
+        ORDER BY (lr.verdict IS NULL) DESC, b.open_roles DESC, p.title LIMIT 400`,
     ]);
-    const careers = { review, live, stats: { ...cstats, last_run: lastRun?.value || null } };
+    const careers = { review, live, links, stats: { ...cstats, last_run: lastRun?.value || null } };
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
     return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} submissions={submissions} comments={comments}
