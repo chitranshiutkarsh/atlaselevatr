@@ -183,13 +183,13 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                         >
                           {label}
                         </text>
-                        {!many && named.has(g) && (
+                        {named.has(g) && (
                           <text
                             textAnchor="middle"
-                            y={r + 9 / k}
-                            style={{ fontSize: 9 / k, fontWeight: 600, fill: '#14213D', paintOrder: 'stroke', stroke: '#F4F1EA', strokeWidth: 2.5 / k, pointerEvents: 'none' }}
+                            y={r + 10 / k}
+                            style={{ fontSize: 10.5 / k, fontWeight: 600, fill: '#14213D', paintOrder: 'stroke', stroke: '#F4F1EA', strokeWidth: 3 / k, pointerEvents: 'none' }}
                           >
-                            {g.members[0]}
+                            {many ? `${g.members[0]} +${g.members.length - 1}` : g.members[0]}
                           </text>
                         )}
                       </g>
