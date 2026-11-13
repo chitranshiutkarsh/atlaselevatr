@@ -16,8 +16,10 @@ const LINKS = [
   { href: '/studio', label: 'My story' },
 ];
 
-export default function Nav({ signedIn = false }) {
+export default function Nav({ signedIn = false, signInOn = true, plansOn = true }) {
   const path = usePathname();
+  const links = LINKS.filter((l) => plansOn || l.href !== '/plans');
+  const showAccount = signedIn || signInOn;
   const [open, setOpen] = useState(false);
   const isOn = (href) => (href === '/' ? path === '/' : path.startsWith(href));
 
@@ -30,7 +32,7 @@ export default function Nav({ signedIn = false }) {
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -41,6 +43,7 @@ export default function Nav({ signedIn = false }) {
               {l.label}
             </Link>
           ))}
+          {showAccount && (
           <Link
             href={signedIn ? '/me' : '/signin'}
             className={`rounded-full px-4 py-2 text-sm font-medium transition ${
@@ -49,6 +52,7 @@ export default function Nav({ signedIn = false }) {
           >
             {signedIn ? 'My Atlas' : 'Sign in'}
           </Link>
+          )}
           <Link href="/submit" className="btn-primary ml-2">
             + Add a problem
           </Link>
@@ -66,7 +70,7 @@ export default function Nav({ signedIn = false }) {
 
       {open && (
         <div className="border-t border-ink/10 bg-paper px-4 pb-4 lg:hidden">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -76,6 +80,7 @@ export default function Nav({ signedIn = false }) {
               {l.label}
             </Link>
           ))}
+          {showAccount && (
           <Link
             href={signedIn ? '/me' : '/signin'}
             onClick={() => setOpen(false)}
@@ -83,6 +88,7 @@ export default function Nav({ signedIn = false }) {
           >
             {signedIn ? 'My Atlas' : 'Sign in'}
           </Link>
+          )}
           <Link href="/submit" onClick={() => setOpen(false)} className="btn-primary mt-4 w-full">
             + Add a problem
           </Link>

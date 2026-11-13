@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { INDUSTRIES, LIMITS } from '@/lib/constants';
 import { COUNTRIES, prettyName } from '@/lib/geo';
 
-export default function ProblemForm({ defaultCountry, email: knownEmail = '' }) {
+export default function ProblemForm({ defaultCountry, email: knownEmail = '', emailOn = true }) {
   const router = useRouter();
   const started = useRef(0);
   const [form, setForm] = useState({
@@ -169,6 +169,7 @@ export default function ProblemForm({ defaultCountry, email: knownEmail = '' }) 
         />
       </div>
 
+      {emailOn && (
       <div>
         <label className="label" htmlFor="follow-email">Email me when someone builds this or suggests a fix (optional)</label>
         <input
@@ -181,6 +182,7 @@ export default function ProblemForm({ defaultCountry, email: knownEmail = '' }) 
           maxLength={120}
         />
       </div>
+      )}
 
       {/* Honeypot: hidden from people, filled in by bots */}
       <div className="hidden" aria-hidden="true">

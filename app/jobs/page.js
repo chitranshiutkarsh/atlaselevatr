@@ -7,6 +7,7 @@ import { listJobs } from '@/lib/queries';
 import { caredProblemIds, listCaredProblems, listRoles, pickerProblems, roleFacets, jobsStats, problemsWithRoles, problemsAwaitingMatches } from '@/lib/roles';
 import { getUserId } from '@/lib/auth';
 import { FREE_MATCHES, PLANS, inr, plusStatus } from '@/lib/plus';
+import { features } from '@/lib/features';
 import { getVisitorId } from '@/lib/security';
 import { db } from '@/lib/db';
 import { ROLE_KINDS } from '@/lib/careers-core';
@@ -127,7 +128,7 @@ export default async function JobsPage({ searchParams }) {
   const importing = stats.roles === 0;
   const kindCount = Object.fromEntries(facets.kinds.map((k) => [k.kind, k.n]));
   // Free: your top matches. Atlas+: every match (the BLR-style "top 3 free").
-  const gated = tab === 'for-you' && !focusProblem && !plan.plus && result.total > FREE_MATCHES;
+  const gated = features().freeMatchLimit && tab === 'for-you' && !focusProblem && !plan.plus && result.total > FREE_MATCHES;
   const shownRoles = gated ? result.roles.slice(0, FREE_MATCHES) : result.roles;
   const lockedCount = gated ? result.total - FREE_MATCHES : 0;
   const pages = gated ? 1 : Math.ceil(result.total / PAGE);

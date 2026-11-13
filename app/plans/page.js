@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import PayPanel from '@/components/PayPanel';
 import { getUser } from '@/lib/auth';
+import { features } from '@/lib/features';
 import { FREE_MATCHES, PLANS, inr, plusStatus } from '@/lib/plus';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,7 @@ function Tick({ children }) {
 
 export default async function PlansPage() {
   const status = await plusStatus();
+  const plusOn = features().plus;
   const user = status.signedIn ? await getUser().catch(() => null) : null;
   const until = status.until ? new Date(status.until).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
 
@@ -80,6 +82,8 @@ export default async function PlansPage() {
           <div className="mt-auto pt-6">
             {status.signedIn ? (
               <p className="rounded-lg bg-paper2 px-3 py-2 text-center text-sm text-ink2">You&apos;re signed in</p>
+            ) : !features().email ? (
+              <p className="rounded-lg bg-paper2 px-3 py-2 text-center text-sm text-ink2">Accounts opening soon</p>
             ) : (
               <Link href="/signin?next=/jobs&why=match" className="btn-ghost w-full justify-center">Create a free account</Link>
             )}
@@ -108,6 +112,8 @@ export default async function PlansPage() {
           <div className="mt-auto space-y-2 pt-6">
             {status.plus ? (
               <p className="rounded-lg bg-paper/10 px-3 py-2 text-center text-sm">Active</p>
+            ) : !plusOn ? (
+              <p className="rounded-lg bg-paper/10 px-3 py-2 text-center text-sm">Opening soon</p>
             ) : (
               <>
                 <a href="#pay-quarter" className="btn-primary w-full justify-center">{inr(PLANS.quarter.price)} for 3 months · best value</a>
@@ -119,7 +125,7 @@ export default async function PlansPage() {
         </section>
       </div>
 
-      {!status.plus && <PayPanel email={user?.email || ''} />}
+      {plusOn && !status.plus && <PayPanel email={user?.email || ''} />}
 
       <section className="card mt-10 grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
         <div>

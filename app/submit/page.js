@@ -1,3 +1,4 @@
+import { features } from '@/lib/features';
 import ProblemForm from '@/components/ProblemForm';
 import { CONTINENT_OF } from '@/lib/geo';
 import { getUser } from '@/lib/auth';
@@ -16,7 +17,7 @@ export default async function SubmitPage({ searchParams }) {
         What&apos;s broken where you live or work? Describe it and say how you&apos;d fix it. As you type, we check whether
         someone has raised it already, so your voice adds up instead of splitting.
       </p>
-      <ProblemForm defaultCountry={country} email={user?.email || ''} />
+      <ProblemForm defaultCountry={country} email={user?.email || ''} emailOn={features().email} />
     </div>
   );
 }

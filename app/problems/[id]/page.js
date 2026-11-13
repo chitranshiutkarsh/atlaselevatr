@@ -1,3 +1,4 @@
+import { features } from '@/lib/features';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Comments from '@/components/Comments';
@@ -111,7 +112,7 @@ export default async function ProblemPage({ params, searchParams }) {
           </p>
           {searchParams?.following !== '1' && (
             <div className="mt-3">
-              <FollowProblem problemId={problem.id} email={user?.email || ''} />
+              {features().email && <FollowProblem problemId={problem.id} email={user?.email || ''} />}
             </div>
           )}
         </div>
@@ -178,13 +179,13 @@ export default async function ProblemPage({ params, searchParams }) {
 
       {!isNew && (
         <div className="card mt-8 p-4">
-          <FollowProblem problemId={problem.id} email={user?.email || ''} following={searchParams?.follow === 'on'} />
+          {features().email && <FollowProblem problemId={problem.id} email={user?.email || ''} following={searchParams?.follow === 'on'} />}
         </div>
       )}
 
       {!subscribed && (
         <div className="mt-6">
-          <DigestSignup compact defaultCountry={problem.country} defaultIndustry={problem.industry} email={user?.email || ''} />
+          {features().email && <DigestSignup compact defaultCountry={problem.country} defaultIndustry={problem.industry} email={user?.email || ''} />}
         </div>
       )}
     </div>
