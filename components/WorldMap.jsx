@@ -69,7 +69,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
         projection="geoEqualEarth"
         projectionConfig={{ scale: 165 }}
         width={800}
-        height={400}
+        height={cities ? 640 : 400}
         style={{ width: '100%', height: 'auto' }}
       >
         <ZoomableGroup
@@ -89,7 +89,8 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                   const dim = continent && cont !== continent;
                   const selected = country === name;
                   const base = fillFor(weights[name] || 0, maxWeight);
-                  const fill = selected ? '#14213D' : base;
+                  // City view: the country is a light canvas so the city bubbles stand out.
+                  const fill = cities ? (selected ? '#EFE6D3' : '#E9E4D8') : selected ? '#14213D' : base;
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -103,7 +104,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                       style={{
                         default: {
                           fill,
-                          opacity: dim ? 0.28 : 1,
+                          opacity: cities && !selected ? 0.45 : dim ? 0.28 : 1,
                           stroke: '#F4F1EA',
                           strokeWidth: stroke,
                           outline: 'none',
@@ -153,7 +154,11 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                   );
                 })}
                 {cities &&
-                  clusterCities(cities, projection, k).map((g) => {
+                  (() => {
+                    const groups = clusterCities(cities, projection, k);
+                    // Name the biggest dozen; the rest show on hover or when zoomed in.
+                    const named = new Set(groups.slice().sort((a, b) => b.value - a.value).slice(0, k >= 10 ? 40 : 12));
+                    return groups.map((g) => {
                     const label = fmt(g.value);
                     const many = g.members.length > 1;
                     const on = !many && g.members[0] === city;
@@ -178,7 +183,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                         >
                           {label}
                         </text>
-                        {!many && k >= 3.5 && (
+                        {!many && named.has(g) && (
                           <text
                             textAnchor="middle"
                             y={r + 9 / k}
@@ -189,7 +194,8 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                         )}
                       </g>
                     );
-                  })}
+                    });
+                  })()}
               </>
             )}
           </Geographies>
