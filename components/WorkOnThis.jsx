@@ -30,7 +30,7 @@ export default function WorkOnThis({ problem, work, curated = [], builders = 0 }
         {extra.length > 0 && (
           <ul className="mt-3 grid gap-3 sm:grid-cols-2">
             {extra.map((j) => (
-              <RoleCard key={`c${j.id}`} role={{ ...j, kind: null, remote: false, posted_at: null }} showProblem={false} compact />
+              <RoleCard key={`c${j.id}`} role={{ ...j, kind: null, remote: false, posted_at: null }} showProblem={false} compact curated />
             ))}
           </ul>
         )}

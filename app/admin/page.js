@@ -57,6 +57,9 @@ export default async function AdminPage() {
       sql`SELECT value FROM meta WHERE key = 'jobs_last_run'`,
     ]);
     const careers = { review, live, stats: { ...cstats, last_run: lastRun?.value || null } };
+    const plus = await sql`SELECT r.id, r.email, r.plan, r.status, r.created_at, u.plus_until
+      FROM plus_requests r LEFT JOIN users u ON u.id = r.user_id
+      ORDER BY (r.status = 'new') DESC, r.created_at DESC LIMIT 200`.catch(() => []);
     // Pass plain values only to the client component.
     const plainJobs = jobs.map(({ created_at, ...j }) => j);
     return <AdminPanel problems={problems} jobs={plainJobs} companies={companies} companyTotal={companyTotal} submissions={submissions} comments={comments}
@@ -64,6 +67,7 @@ export default async function AdminPage() {
         proofs={proofs}
         careers={careers}
         intros={intros.map((i) => ({ ...i, created_at: new Date(i.created_at).toISOString() }))}
+        plus={plus.map((p) => ({ ...p, created_at: new Date(p.created_at).toISOString(), plus_until: p.plus_until ? new Date(p.plus_until).toISOString() : null }))}
       />;
   } catch (err) {
     console.error(err);

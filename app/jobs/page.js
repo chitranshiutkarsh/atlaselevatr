@@ -6,6 +6,7 @@ import JobsRefreshPing from '@/components/JobsRefreshPing';
 import { listJobs } from '@/lib/queries';
 import { caredProblemIds, listCaredProblems, listRoles, pickerProblems, roleFacets, jobsStats, problemsWithRoles, problemsAwaitingMatches } from '@/lib/roles';
 import { getUserId } from '@/lib/auth';
+import { FREE_MATCHES, PLANS, inr, plusStatus } from '@/lib/plus';
 import { getVisitorId } from '@/lib/security';
 import { db } from '@/lib/db';
 import { ROLE_KINDS } from '@/lib/careers-core';
@@ -53,7 +54,9 @@ export default async function JobsPage({ searchParams }) {
   let tab;
   let byProblem = [];
   let awaiting = 0;
+  let plan = { signedIn: false, plus: false };
   try {
+    plan = await plusStatus();
     const visitorId = getVisitorId();
     const userId = getUserId();
     [stats, cared, facets, curated] = await Promise.all([
@@ -107,7 +110,11 @@ export default async function JobsPage({ searchParams }) {
   const caredSet = new Set(cared);
   const importing = stats.roles === 0;
   const kindCount = Object.fromEntries(facets.kinds.map((k) => [k.kind, k.n]));
-  const pages = Math.ceil(result.total / PAGE);
+  // Free: your top matches. Atlas+: every match (the BLR-style "top 3 free").
+  const gated = tab === 'for-you' && !focusProblem && !plan.plus && result.total > FREE_MATCHES;
+  const shownRoles = gated ? result.roles.slice(0, FREE_MATCHES) : result.roles;
+  const lockedCount = gated ? result.total - FREE_MATCHES : 0;
+  const pages = gated ? 1 : Math.ceil(result.total / PAGE);
   const filtered = Boolean(kind || country || remote || industry || q);
 
   return (
@@ -302,8 +309,23 @@ export default async function JobsPage({ searchParams }) {
           {result.roles.length > 0 ? (
             <>
               <ul className="mt-5 grid gap-3 md:grid-cols-2">
-                {result.roles.map((r) => <RoleCard key={r.id} role={r} showProblem={!focusProblem} />)}
+                {shownRoles.map((r) => <RoleCard key={r.id} role={r} showProblem={!focusProblem} />)}
               </ul>
+              {gated && (
+                <div className="card mt-4 flex flex-col items-start gap-4 border-signal/40 bg-signal/5 p-6 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="label text-signal">Atlas+</p>
+                    <h3 className="mt-1 font-display text-2xl font-semibold">
+                      {lockedCount.toLocaleString('en-IN')} more role{lockedCount === 1 ? '' : 's'} match your problems
+                    </h3>
+                    <p className="mt-1 text-sm text-ink2">
+                      Your top {FREE_MATCHES} are free. Atlas+ shows every match, at its launch price of {inr(PLANS.month.price)} a month or{' '}
+                      {inr(PLANS.quarter.price)} for 3 months.
+                    </p>
+                  </div>
+                  <Link href="/plans" className="btn-primary shrink-0">See plans →</Link>
+                </div>
+              )}
               {pages > 1 && (
                 <div className="mt-6 flex items-center justify-between gap-3">
                   {page > 1 ? (
@@ -362,6 +384,7 @@ export default async function JobsPage({ searchParams }) {
               <RoleCard
                 key={`c${j.id}`}
                 role={{ ...j, kind: null, remote: false, posted_at: null, problem_id: j.problem_id, votes: 0 }}
+                curated
               />
             ))}
           </ul>

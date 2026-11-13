@@ -111,7 +111,12 @@ export default function Atlas({ unicorns, countryCounts }) {
               {layer === 'continent' && `Layer 2 · ${continent}`}
               {layer === 'country' && `Layer 3 · ${prettyName(country)}`}
             </p>
-            <p className="label hidden sm:block">Tap a country</p>
+            <div className="flex items-center gap-3">
+              <p className="label hidden sm:block">Tap a country · + / − to scale</p>
+              <Link href="/jobs?tab=for-you" className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-paper hover:bg-signal">
+                ✦ Match me
+              </Link>
+            </div>
           </div>
           <WorldMap
             weights={weights}

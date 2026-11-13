@@ -21,7 +21,7 @@ async function call(url, method, body) {
 const EMPTY_JOB = { title: '', company: '', location: '', source: 'LinkedIn', url: '', focus: '', industry: '', problem_id: '' };
 const EMPTY_CO = { name: '', country: 'India', industry: 'Fintech', problem: '', website: '', city: '', sector: '', is_unicorn: false };
 
-export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], careers = { review: [], live: [], stats: {} } }) {
+export default function AdminPanel({ problems, jobs, companies, companyTotal, submissions = [], comments = [], leads = [], proofs = [], intros = [], plus = [], careers = { review: [], live: [], stats: {} } }) {
   const router = useRouter();
   const newLeads = leads.filter((l) => l.status === 'new').length;
   const [tab, setTab] = useState(newLeads ? 'leads' : submissions.length ? 'submissions' : 'jobs');
@@ -60,6 +60,7 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
 
   const tabs = [
     ['leads', `🚀 Builders (${newLeads} new / ${leads.length})`],
+    ['plus', `⭐ Atlas+ (${plus.filter((p) => p.status === 'new').length} new)`],
     ['intros', `🤝 Intro requests (${intros.filter((i) => i.status === 'new').length} new)`],
     ['submissions', `Startup submissions (${submissions.length})`],
     ['proofs', `🙋 Stories (${proofs.length})`],
@@ -265,6 +266,46 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
             </li>
           ))}
         </ul>
+      )}
+
+      {tab === 'plus' && (
+        <section className="mt-6">
+          <p className="text-sm text-ink2">
+            People who chose an Atlas+ plan. Once they have paid (or if you set ATLAS_PLUS_MONTH_LINK / ATLAS_PLUS_QUARTER_LINK
+            payment links in Vercel, once the payment shows up), press Activate to turn Atlas+ on for 1 or 3 months.
+          </p>
+          <ul className="mt-4 space-y-2">
+            {plus.length === 0 && <li className="text-ink2">No Atlas+ requests yet.</li>}
+            {plus.map((p) => (
+              <li key={p.id} className={`card flex flex-wrap items-center justify-between gap-3 p-4 ${p.status === 'new' ? '' : 'opacity-70'}`}>
+                <div className="min-w-0">
+                  <p className="font-semibold">
+                    <a href={`mailto:${p.email}`} className="underline">{p.email}</a>
+                    <span className="ml-2 font-mono text-xs font-normal text-ink2">
+                      {p.plan === 'quarter' ? '₹499 · 3 months' : '₹249 · monthly'} · {new Date(p.created_at).toLocaleDateString('en-IN')}
+                    </span>
+                  </p>
+                  <p className="mt-0.5 font-mono text-xs text-ink2">
+                    {p.status}
+                    {p.plus_until ? ` · Atlas+ until ${new Date(p.plus_until).toLocaleDateString('en-IN')}` : ''}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button className="btn-primary px-3 py-1.5 text-sm" disabled={busy}
+                    onClick={() => run(() => call(`/api/admin/plus/${p.id}`, 'PATCH', { action: 'activate' }), 'Atlas+ turned on.')}>
+                    Activate
+                  </button>
+                  {p.status === 'new' && (
+                    <button className="btn-ghost px-3 py-1.5 text-sm" disabled={busy}
+                      onClick={() => run(() => call(`/api/admin/plus/${p.id}`, 'PATCH', { action: 'dismiss' }))}>
+                      Dismiss
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {tab === 'intros' && (

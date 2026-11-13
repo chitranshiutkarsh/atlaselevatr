@@ -22,8 +22,10 @@ function where(role) {
 
 // One open role. Shows the problem its startup works on, so people see what
 // they'd be solving before they apply.
-export default function RoleCard({ role, showProblem = true, compact = false }) {
+export default function RoleCard({ role, showProblem = true, compact = false, curated = false }) {
   const posted = ago(role.posted_at);
+  // Apply goes through Atlas (a free account opens it), then on to the company's page.
+  const apply = role.id ? `/go/${curated ? 'job' : 'role'}/${role.id}` : role.url;
   return (
     <li className={`card flex min-w-0 flex-col ${compact ? 'p-4' : 'p-5'}`}>
       <div className="flex items-start justify-between gap-3">
@@ -54,7 +56,7 @@ export default function RoleCard({ role, showProblem = true, compact = false }) 
           {where(role)}
           {posted ? ` · ${posted}` : ''}
         </span>
-        <a href={role.url} target="_blank" rel="noopener noreferrer" className="btn-primary shrink-0 px-4 py-2">
+        <a href={apply} target="_blank" rel="noopener noreferrer nofollow" className="btn-primary shrink-0 px-4 py-2">
           Apply ↗
         </a>
       </div>

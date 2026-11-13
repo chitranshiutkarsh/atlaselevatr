@@ -11,6 +11,7 @@ import { getUser } from '@/lib/auth';
 import { getDigest } from '@/lib/digest';
 import { VALIDATION } from '@/lib/constants';
 import { caredProblemIds, listCaredProblems } from '@/lib/roles';
+import { plusStatus } from '@/lib/plus';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -24,8 +25,10 @@ export default async function MePage({ searchParams }) {
   let digest;
   let invite = null;
   let caredList = [];
+  let plan = { plus: false, until: null };
   try {
     user = await getUser();
+    plan = await plusStatus();
     if (user) {
       const sql = await db();
       [stories, claims, [{ votes }], digest] = await Promise.all([
@@ -58,6 +61,18 @@ export default async function MePage({ searchParams }) {
       <p className="label">My Atlas</p>
       <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight">{user.email}</h1>
       {notice && <p className="mt-4 rounded-lg bg-moss/10 px-4 py-3 text-sm font-semibold text-moss">{notice}</p>}
+      <p className="mt-3 text-sm">
+        {plan.plus ? (
+          <span className="rounded-full bg-ink px-3 py-1 font-semibold text-paper">
+            ⭐ Atlas+{plan.until ? ` until ${new Date(plan.until).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+          </span>
+        ) : (
+          <>
+            <span className="text-ink2">Free account.</span>{' '}
+            <Link href="/plans" className="font-semibold text-signal hover:underline">Get Atlas+ to see every role matched to your problems →</Link>
+          </>
+        )}
+      </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-8">
