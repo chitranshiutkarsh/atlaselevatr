@@ -112,7 +112,7 @@ export default async function Home() {
         </section>
       )}
 
-      <Atlas unicorns={data.unicorns} countryCounts={data.countryCounts} byArea={data.byArea || {}} />
+      <Atlas unicorns={data.unicorns} countryCounts={data.countryCounts} byArea={data.byArea || {}} indiaCities={data.indiaCities || []} />
     </>
   );
 }

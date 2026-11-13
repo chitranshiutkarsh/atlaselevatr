@@ -12,6 +12,7 @@ import { db } from '@/lib/db';
 import { ROLE_KINDS } from '@/lib/careers-core';
 import { INDUSTRIES } from '@/lib/constants';
 import { CONTINENT_OF, prettyName } from '@/lib/geo';
+import { INDIA_CITIES } from '@/lib/india-cities';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -47,6 +48,7 @@ export default async function JobsPage({ searchParams }) {
   const industry = INDUSTRIES.includes(searchParams.industry) ? searchParams.industry : null;
   const remote = searchParams.remote === '1';
   const level = searchParams.level === 'fresher' ? 'fresher' : null;
+  const city = INDIA_CITIES[searchParams.city] ? searchParams.city : null;
   const days = ['4', '7', '30'].includes(searchParams.days) ? Number(searchParams.days) : null;
   const q = typeof searchParams.q === 'string' ? searchParams.q.trim().slice(0, 80) || null : null;
   const problemId = parseInt(searchParams.problem, 10) || null;
@@ -89,7 +91,7 @@ export default async function JobsPage({ searchParams }) {
     if (companyId) [focusCompany] = await sql`SELECT id, name FROM companies WHERE id = ${companyId}`;
 
     const focus = focusProblem ? [focusProblem.id] : tab === 'for-you' ? cared : null;
-    const filters = { kind, country, remote, industry, q, level, days, companyId: focusCompany?.id || null, limit: PAGE, offset: (page - 1) * PAGE };
+    const filters = { kind, country, remote, industry, q, level, days, city, companyId: focusCompany?.id || null, limit: PAGE, offset: (page - 1) * PAGE };
     if (tab === 'problems') {
       [byProblem, awaiting] = await Promise.all([problemsWithRoles({ q, industry }), problemsAwaitingMatches()]);
     } else if (!(tab === 'for-you' && !focusProblem && cared.length === 0)) {
@@ -115,6 +117,7 @@ export default async function JobsPage({ searchParams }) {
     remote: remote ? '1' : null,
     level,
     days,
+    city,
     industry,
     q,
     problem: focusProblem?.id || null,
@@ -128,7 +131,7 @@ export default async function JobsPage({ searchParams }) {
   const shownRoles = gated ? result.roles.slice(0, FREE_MATCHES) : result.roles;
   const lockedCount = gated ? result.total - FREE_MATCHES : 0;
   const pages = gated ? 1 : Math.ceil(result.total / PAGE);
-  const filtered = Boolean(kind || country || remote || industry || q || level || days);
+  const filtered = Boolean(kind || country || remote || industry || q || level || days || city);
 
   return (
     <div className="pt-12">
@@ -314,7 +317,7 @@ export default async function JobsPage({ searchParams }) {
               🏠 Remote
             </Link>
           </div>
-          <form action="/jobs" method="get" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_200px_200px_200px_auto]">
+          <form action="/jobs" method="get" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_170px_170px_150px_170px_auto]">
             {current.tab && <input type="hidden" name="tab" value={current.tab} />}
             {focusProblem && <input type="hidden" name="problem" value={focusProblem.id} />}
             {focusCompany && <input type="hidden" name="company" value={focusCompany.id} />}
@@ -336,6 +339,10 @@ export default async function JobsPage({ searchParams }) {
                   {prettyName(c.country)} ({c.n})
                 </option>
               ))}
+            </select>
+            <select name="city" defaultValue={city || ''} className="input" aria-label="City in India">
+              <option value="">Any city</option>
+              {Object.keys(INDIA_CITIES).sort().map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select name="industry" defaultValue={industry || ''} className="input" aria-label="Area">
               <option value="">Any area</option>

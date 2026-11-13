@@ -18,7 +18,7 @@ function fillFor(weight, max) {
 }
 
 const MIN_ZOOM = 1;
-const MAX_ZOOM = 12;
+const MAX_ZOOM = 40;
 // Plain scrolling (and one-finger swipes on phones) keep scrolling the page;
 // ctrl/⌘ + scroll, a trackpad pinch, two fingers or a mouse drag move the map.
 const zoomFilter = (e) => {
@@ -30,7 +30,25 @@ const fmt = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : S
 
 // Scale up / scale down like a city map: + and − buttons, drag to move,
 // pinch or ctrl/⌘ + scroll to zoom. Count bubbles show where the activity is.
-function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick }) {
+// Cities close together on screen merge into one bubble; zooming in splits them.
+function clusterCities(cities, projection, k) {
+  const out = [];
+  const gap = 30; // map units on screen
+  for (const c of [...cities].sort((a, b) => b.value - a.value)) {
+    const p = projection(c.coords);
+    if (!p) continue;
+    const near = out.find((g) => Math.hypot((g.x - p[0]) * k, (g.y - p[1]) * k) < gap);
+    if (near) {
+      near.value += c.value;
+      near.members.push(c.city);
+    } else {
+      out.push({ x: p[0], y: p[1], value: c.value, members: [c.city], coords: c.coords });
+    }
+  }
+  return out;
+}
+
+function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick, cities = null, city = null, onPickCity }) {
   const [pos, setPos] = useState({ coordinates: center, zoom });
   // A new layer (world → continent → country) re-centres the map.
   useEffect(() => {
@@ -63,7 +81,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
           filterZoomEvent={zoomFilter}
         >
           <Geographies geography={GEO_URL}>
-            {({ geographies, path }) => (
+            {({ geographies, path, projection }) => (
               <>
                 {geographies.map((geo) => {
                   const name = geo.properties.name;
@@ -110,7 +128,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                   const name = geo.properties.name;
                   const cont = CONTINENT_OF[name];
                   const w = weights[name] || 0;
-                  if (!cont || !w || w < bubbleMin) return null;
+                  if (cities || !cont || !w || w < bubbleMin) return null;
                   if (continent && cont !== continent) return null;
                   const [x, y] = path.centroid(geo);
                   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
@@ -134,6 +152,44 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                     </g>
                   );
                 })}
+                {cities &&
+                  clusterCities(cities, projection, k).map((g) => {
+                    const label = fmt(g.value);
+                    const many = g.members.length > 1;
+                    const on = !many && g.members[0] === city;
+                    const r = (11 + label.length * 3.4) / k;
+                    return (
+                      <g
+                        key={`c-${g.members.join('|')}`}
+                        transform={`translate(${g.x},${g.y})`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          many
+                            ? setPos({ coordinates: g.coords, zoom: Math.min(MAX_ZOOM, k * 2.5) })
+                            : onPickCity && onPickCity(g.members[0])
+                        }
+                      >
+                        <title>{many ? `${g.members.join(', ')}: tap to zoom in` : g.members[0]}</title>
+                        <circle r={r} fill={on ? '#E4572E' : '#14213D'} stroke="#FFFFFF" strokeWidth={1.5 / k} />
+                        <text
+                          textAnchor="middle"
+                          dy="0.35em"
+                          style={{ fontSize: 11 / k, fontWeight: 700, fill: '#FFFFFF', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
+                        >
+                          {label}
+                        </text>
+                        {!many && k >= 3.5 && (
+                          <text
+                            textAnchor="middle"
+                            y={r + 9 / k}
+                            style={{ fontSize: 9 / k, fontWeight: 600, fill: '#14213D', paintOrder: 'stroke', stroke: '#F4F1EA', strokeWidth: 2.5 / k, pointerEvents: 'none' }}
+                          >
+                            {g.members[0]}
+                          </text>
+                        )}
+                      </g>
+                    );
+                  })}
               </>
             )}
           </Geographies>

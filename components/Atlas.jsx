@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { INDUSTRIES } from '@/lib/constants';
+import { INDIA_CITIES, INDIA_VIEW, indiaCity } from '@/lib/india-cities';
 import { CONTINENTS, CONTINENT_OF, WORLD_VIEW, prettyName, continentByName } from '@/lib/geo';
 import StartupDirectory from './StartupDirectory';
 import VoteButton from './VoteButton';
@@ -16,7 +17,8 @@ const WorldMap = dynamic(() => import('./WorldMap'), {
 
 const fmt = (n) => (n || 0).toLocaleString('en-IN');
 
-export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
+export default function Atlas({ unicorns, countryCounts, byArea = {}, indiaCities = [] }) {
+  const [city, setCity] = useState(null);
   const router = useRouter();
   const [area, setArea] = useState('');
   const [search, setSearch] = useState('');
@@ -60,6 +62,14 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
     e.preventDefault();
     const q = search.trim();
     if (!q) return;
+    const cityHit = Object.keys(INDIA_CITIES).find((c) => c.toLowerCase() === q.toLowerCase());
+    if (cityHit) {
+      setContinent('Asia');
+      setCountry('India');
+      setCity(cityHit);
+      setSearch('');
+      return;
+    }
     const hit = Object.keys(CONTINENT_OF).find((n) => n.toLowerCase() === q.toLowerCase() || prettyName(n).toLowerCase() === q.toLowerCase());
     if (hit) {
       setContinent(CONTINENT_OF[hit]);
@@ -86,25 +96,41 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
     };
   }, [continent, country]);
 
-  const view = continent ? continentByName(continent) : null;
+  // India goes city by city: the map zooms to India and shows a bubble per city.
+  const inIndia = country === 'India';
+  const view = inIndia ? INDIA_VIEW : continent ? continentByName(continent) : null;
   const center = view ? view.center : WORLD_VIEW.center;
   const zoom = view ? view.zoom : WORLD_VIEW.zoom;
+  const cityList = useMemo(
+    () =>
+      indiaCities
+        .filter((c) => INDIA_CITIES[c.city])
+        .map((c) => ({ ...c, coords: INDIA_CITIES[c.city], value: area ? c.areas[area] || 0 : c.startups + c.jobs }))
+        .filter((c) => c.value > 0)
+        .sort((a, b) => b.value - a.value),
+    [indiaCities, area]
+  );
+  const cityInfo = city ? indiaCities.find((c) => c.city === city) : null;
 
   const pickCountry = (name, cont) => {
     setContinent(cont);
     setCountry(name);
+    setCity(null);
   };
   const pickContinent = (name) => {
     setContinent(name);
     setCountry(null);
+    setCity(null);
   };
   const reset = () => {
     setContinent(null);
     setCountry(null);
+    setCity(null);
   };
 
   const layer = country ? 'country' : continent ? 'continent' : 'world';
-  const scopedUnicorns = country ? unicornsByCountry[country] || [] : continent ? unicornsByContinent[continent] || [] : [];
+  const scopedUnicorns = (country ? unicornsByCountry[country] || [] : continent ? unicornsByContinent[continent] || [] : [])
+    .filter((u) => !city || indiaCity(u.city) === city);
   const countriesInContinent = continent
     ? Object.entries(countryCounts)
         .filter(([n]) => CONTINENT_OF[n] === continent)
@@ -133,7 +159,7 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search a country or startup"
+            placeholder="Search a country, Indian city or startup"
             aria-label="Search a country or startup"
             className="w-full bg-transparent text-sm outline-none"
             maxLength={80}
@@ -155,7 +181,7 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
             <p className="label">
               {layer === 'world' && 'Layer 1 · World'}
               {layer === 'continent' && `Layer 2 · ${continent}`}
-              {layer === 'country' && `Layer 3 · ${prettyName(country)}`}
+              {layer === 'country' && `Layer 3 · ${prettyName(country)}${inIndia ? (city ? ` · ${city}` : ' · by city') : ''}`}
             </p>
             <div className="flex items-center gap-3">
               <p className="label hidden sm:block">Tap a country · + / − to scale</p>
@@ -172,6 +198,9 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
             center={center}
             zoom={zoom}
             onPick={pickCountry}
+            cities={inIndia ? cityList : null}
+            city={city}
+            onPickCity={setCity}
           />
           <div className="flex flex-wrap items-center gap-3 px-2 pt-2 text-xs text-ink2">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#E3DDCF]" /> No data yet
@@ -217,6 +246,39 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
               <p className="mt-1 font-mono text-xs text-ink2">
                 {fmt(scopeCount)} startups · {fmt(scopedUnicorns.length)} unicorns
               </p>
+
+              {inIndia && (
+                <div className="mt-4">
+                  {cityInfo ? (
+                    <div className="rounded-xl bg-ink p-4 text-paper">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-display text-xl font-semibold">{city}</p>
+                        <button onClick={() => setCity(null)} className="text-xs text-paper/70 hover:text-paper">All cities ✕</button>
+                      </div>
+                      <p className="mt-1 font-mono text-xs text-paper/70">
+                        {fmt(cityInfo.startups)} startups · {fmt(cityInfo.jobs)} open roles
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link href={`/jobs?tab=all&country=India&city=${encodeURIComponent(city)}`} className="rounded-full bg-signal px-3 py-1.5 text-xs font-semibold text-white">
+                          Jobs in {city} →
+                        </Link>
+                        <a href="#city-startups" className="rounded-full border border-paper/30 px-3 py-1.5 text-xs font-semibold">
+                          Startups in {city} ↓
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="label">Pick a city</p>
+                  )}
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {cityList.slice(0, 18).map((c) => (
+                      <button key={c.city} onClick={() => setCity(c.city)} className={city === c.city ? 'chip-on' : 'chip'}>
+                        {c.city} <span className="ml-1 font-mono opacity-70">{fmt(c.value)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {layer === 'continent' && countriesInContinent.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -288,22 +350,24 @@ export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
 
       {/* Bottom layer: every startup in scope, by category */}
       {layer !== 'world' && (
-        <div className="card mt-6 p-4 sm:p-6">
+        <div id="city-startups" className="card mt-6 scroll-mt-24 p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
             <div>
               <p className="label">All startups</p>
               <h3 className="font-display text-2xl font-semibold">
-                {fmt(scopeCount)} startups in {layer === 'country' ? prettyName(country) : continent}, by category
+                {city && cityInfo
+                  ? `${fmt(cityInfo.startups)} startups in ${city}, by category`
+                  : `${fmt(scopeCount)} startups in ${layer === 'country' ? prettyName(country) : continent}, by category`}
               </h3>
             </div>
             <Link
-              href={country ? `/startups?country=${encodeURIComponent(country)}` : `/startups?continent=${encodeURIComponent(continent)}`}
+              href={country ? `/startups?country=${encodeURIComponent(country)}${city ? `&city=${encodeURIComponent(city)}` : ''}` : `/startups?continent=${encodeURIComponent(continent)}`}
               className="text-sm font-semibold text-signal hover:underline"
             >
               Open full directory →
             </Link>
           </div>
-          <StartupDirectory country={country} continent={country ? null : continent} />
+          <StartupDirectory key={city || 'all'} country={country} continent={country ? null : continent} initial={city ? { city } : {}} />
         </div>
       )}
     </section>
