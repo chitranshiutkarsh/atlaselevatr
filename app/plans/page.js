@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import PlusButton from '@/components/PlusButton';
+import PayPanel from '@/components/PayPanel';
+import { getUser } from '@/lib/auth';
 import { FREE_MATCHES, PLANS, inr, plusStatus } from '@/lib/plus';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +41,7 @@ function Tick({ children }) {
 
 export default async function PlansPage() {
   const status = await plusStatus();
+  const user = status.signedIn ? await getUser().catch(() => null) : null;
   const until = status.until ? new Date(status.until).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
 
   return (
@@ -108,14 +110,16 @@ export default async function PlansPage() {
               <p className="rounded-lg bg-paper/10 px-3 py-2 text-center text-sm">Active</p>
             ) : (
               <>
-                <PlusButton plan="quarter" signedIn={status.signedIn} label={`${inr(PLANS.quarter.price)} for 3 months · best value`} />
-                <PlusButton plan="month" signedIn={status.signedIn} label={`${inr(PLANS.month.price)} a month`} primary={false} />
+                <a href="#pay-quarter" className="btn-primary w-full justify-center">{inr(PLANS.quarter.price)} for 3 months · best value</a>
+                <a href="#pay-month" className="btn w-full justify-center border border-paper/30 text-paper hover:bg-paper/10">{inr(PLANS.month.price)} a month</a>
               </>
             )}
-            <p className="text-center text-[11px] text-paper/60">Cancel anytime. Prices in INR.</p>
+            <p className="text-center text-[11px] text-paper/60">Pay once by UPI. No auto-renewal.</p>
           </div>
         </section>
       </div>
+
+      {!status.plus && <PayPanel email={user?.email || ''} />}
 
       <section className="card mt-10 grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
         <div>

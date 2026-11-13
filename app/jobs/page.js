@@ -24,6 +24,15 @@ export const metadata = {
 const PAGE = 30;
 const KIND_KEYS = ROLE_KINDS.map(([k]) => k);
 
+function since(iso) {
+  const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const d = Math.round(hours / 24);
+  return `${d} day${d === 1 ? '' : 's'} ago`;
+}
+
 function href(current, change) {
   const next = { ...current, ...change };
   const params = new URLSearchParams();
@@ -37,6 +46,8 @@ export default async function JobsPage({ searchParams }) {
   const country = CONTINENT_OF[searchParams.country] ? searchParams.country : null;
   const industry = INDUSTRIES.includes(searchParams.industry) ? searchParams.industry : null;
   const remote = searchParams.remote === '1';
+  const level = searchParams.level === 'fresher' ? 'fresher' : null;
+  const days = ['4', '7', '30'].includes(searchParams.days) ? Number(searchParams.days) : null;
   const q = typeof searchParams.q === 'string' ? searchParams.q.trim().slice(0, 80) || null : null;
   const problemId = parseInt(searchParams.problem, 10) || null;
   const companyId = parseInt(searchParams.company, 10) || null;
@@ -78,7 +89,7 @@ export default async function JobsPage({ searchParams }) {
     if (companyId) [focusCompany] = await sql`SELECT id, name FROM companies WHERE id = ${companyId}`;
 
     const focus = focusProblem ? [focusProblem.id] : tab === 'for-you' ? cared : null;
-    const filters = { kind, country, remote, industry, q, companyId: focusCompany?.id || null, limit: PAGE, offset: (page - 1) * PAGE };
+    const filters = { kind, country, remote, industry, q, level, days, companyId: focusCompany?.id || null, limit: PAGE, offset: (page - 1) * PAGE };
     if (tab === 'problems') {
       [byProblem, awaiting] = await Promise.all([problemsWithRoles({ q, industry }), problemsAwaitingMatches()]);
     } else if (!(tab === 'for-you' && !focusProblem && cared.length === 0)) {
@@ -102,6 +113,8 @@ export default async function JobsPage({ searchParams }) {
     kind,
     country,
     remote: remote ? '1' : null,
+    level,
+    days,
     industry,
     q,
     problem: focusProblem?.id || null,
@@ -115,7 +128,7 @@ export default async function JobsPage({ searchParams }) {
   const shownRoles = gated ? result.roles.slice(0, FREE_MATCHES) : result.roles;
   const lockedCount = gated ? result.total - FREE_MATCHES : 0;
   const pages = gated ? 1 : Math.ceil(result.total / PAGE);
-  const filtered = Boolean(kind || country || remote || industry || q);
+  const filtered = Boolean(kind || country || remote || industry || q || level || days);
 
   return (
     <div className="pt-12">
@@ -137,6 +150,18 @@ export default async function JobsPage({ searchParams }) {
             </>
           )}
       </p>
+      {!importing && (
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-ink2">
+          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-moss" />
+          <span>Live{stats.last_run ? ` · updated ${since(stats.last_run)}` : ''}</span>
+          {stats.new_roles > 0 && (
+            <Link href={href(current, { days: 4, page: null })} className="font-semibold text-signal hover:underline">
+              · {stats.new_roles.toLocaleString('en-IN')} new in the last 4 days
+            </Link>
+          )}
+          <span>· roles refresh daily, new startups&apos; jobs added every 4 days</span>
+        </p>
+      )}
 
       {focusProblem || focusCompany ? (
         <div className="card mt-6 flex flex-wrap items-center justify-between gap-3 p-4">
@@ -267,10 +292,34 @@ export default async function JobsPage({ searchParams }) {
 
       {tab !== 'problems' && !(tab === 'for-you' && cared.length === 0 && !focusProblem) && (
         <section className="mt-8">
+          {/* Quick filters, like a job map's "All roles / Freshers" and "Posted" toggles */}
+          <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex rounded-full border border-ink/15 bg-white p-0.5 text-sm">
+              {[[null, 'All roles'], ['fresher', '🎓 Freshers']].map(([v, l]) => (
+                <Link key={l} href={href(current, { level: v, page: null })}
+                  className={`rounded-full px-3 py-1 font-semibold ${level === v ? 'bg-ink text-paper' : 'text-ink2 hover:text-ink'}`}>
+                  {l}
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-1 text-sm">
+              <span className="mr-1 font-mono text-[10px] uppercase tracking-wide text-ink2">Posted</span>
+              {[[null, 'Any time'], [4, 'Last 4 days'], [7, 'This week'], [30, 'This month']].map(([v, l]) => (
+                <Link key={l} href={href(current, { days: v, page: null })} className={days === v ? 'chip-on' : 'chip'}>
+                  {l}
+                </Link>
+              ))}
+            </div>
+            <Link href={href(current, { remote: remote ? null : '1', page: null })} className={remote ? 'chip-on' : 'chip'}>
+              🏠 Remote
+            </Link>
+          </div>
           <form action="/jobs" method="get" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_200px_200px_200px_auto]">
             {current.tab && <input type="hidden" name="tab" value={current.tab} />}
             {focusProblem && <input type="hidden" name="problem" value={focusProblem.id} />}
             {focusCompany && <input type="hidden" name="company" value={focusCompany.id} />}
+            {level && <input type="hidden" name="level" value={level} />}
+            {days && <input type="hidden" name="days" value={days} />}
             <input name="q" defaultValue={q || ''} className="input" placeholder="Search roles or startups" maxLength={80} aria-label="Search roles" />
             <select name="kind" defaultValue={kind || ''} className="input" aria-label="Role type">
               <option value="">Any role type</option>

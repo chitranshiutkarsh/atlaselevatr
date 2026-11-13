@@ -57,7 +57,7 @@ export default async function AdminPage() {
       sql`SELECT value FROM meta WHERE key = 'jobs_last_run'`,
     ]);
     const careers = { review, live, stats: { ...cstats, last_run: lastRun?.value || null } };
-    const plus = await sql`SELECT r.id, r.email, r.plan, r.status, r.created_at, u.plus_until
+    const plus = await sql`SELECT r.id, r.email, r.plan, r.status, r.created_at, r.upi_ref, r.amount, coalesce(u.plus_until, r.plus_until) AS plus_until
       FROM plus_requests r LEFT JOIN users u ON u.id = r.user_id
       ORDER BY (r.status = 'new') DESC, r.created_at DESC LIMIT 200`.catch(() => []);
     // Pass plain values only to the client component.

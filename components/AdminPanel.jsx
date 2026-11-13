@@ -271,8 +271,8 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
       {tab === 'plus' && (
         <section className="mt-6">
           <p className="text-sm text-ink2">
-            People who chose an Atlas+ plan. Once they have paid (or if you set ATLAS_PLUS_MONTH_LINK / ATLAS_PLUS_QUARTER_LINK
-            payment links in Vercel, once the payment shows up), press Activate to turn Atlas+ on for 1 or 3 months.
+            People who paid for Atlas+ by UPI. Match the UPI reference and amount with your bank or GPay history, then press
+            Activate to turn Atlas+ on for 1 or 3 months (on their email and the browser they paid from).
           </p>
           <ul className="mt-4 space-y-2">
             {plus.length === 0 && <li className="text-ink2">No Atlas+ requests yet.</li>}
@@ -282,10 +282,11 @@ export default function AdminPanel({ problems, jobs, companies, companyTotal, su
                   <p className="font-semibold">
                     <a href={`mailto:${p.email}`} className="underline">{p.email}</a>
                     <span className="ml-2 font-mono text-xs font-normal text-ink2">
-                      {p.plan === 'quarter' ? '₹499 · 3 months' : '₹249 · monthly'} · {new Date(p.created_at).toLocaleDateString('en-IN')}
+                      {p.plan === 'quarter' ? '3 months' : '1 month'} · ₹{p.amount ?? '–'} · {new Date(p.created_at).toLocaleDateString('en-IN')}
                     </span>
                   </p>
                   <p className="mt-0.5 font-mono text-xs text-ink2">
+                    {p.upi_ref ? `UPI ref ${p.upi_ref} · ` : ''}
                     {p.status}
                     {p.plus_until ? ` · Atlas+ until ${new Date(p.plus_until).toLocaleDateString('en-IN')}` : ''}
                   </p>

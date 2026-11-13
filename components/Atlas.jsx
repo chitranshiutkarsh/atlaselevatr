@@ -2,7 +2,9 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { INDUSTRIES } from '@/lib/constants';
 import { CONTINENTS, CONTINENT_OF, WORLD_VIEW, prettyName, continentByName } from '@/lib/geo';
 import StartupDirectory from './StartupDirectory';
 import VoteButton from './VoteButton';
@@ -14,7 +16,10 @@ const WorldMap = dynamic(() => import('./WorldMap'), {
 
 const fmt = (n) => (n || 0).toLocaleString('en-IN');
 
-export default function Atlas({ unicorns, countryCounts }) {
+export default function Atlas({ unicorns, countryCounts, byArea = {} }) {
+  const router = useRouter();
+  const [area, setArea] = useState('');
+  const [search, setSearch] = useState('');
   const [continent, setContinent] = useState(null);
   const [country, setCountry] = useState(null);
   const [problems, setProblems] = useState([]);
@@ -46,6 +51,24 @@ export default function Atlas({ unicorns, countryCounts }) {
       unicornsByCountry,
     };
   }, [unicorns, countryCounts]);
+
+  // Filtering by area re-shades the map and its count bubbles.
+  const areaWeights = area ? byArea[area] || {} : weights;
+  const areaMax = Math.max(1, ...Object.values(areaWeights));
+
+  const onSearch = (e) => {
+    e.preventDefault();
+    const q = search.trim();
+    if (!q) return;
+    const hit = Object.keys(CONTINENT_OF).find((n) => n.toLowerCase() === q.toLowerCase() || prettyName(n).toLowerCase() === q.toLowerCase());
+    if (hit) {
+      setContinent(CONTINENT_OF[hit]);
+      setCountry(hit);
+      setSearch('');
+      return;
+    }
+    router.push(`/startups?continent=all&q=${encodeURIComponent(q)}${area ? `&industry=${encodeURIComponent(area)}` : ''}`);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams({ limit: '6' });
@@ -103,6 +126,29 @@ export default function Atlas({ unicorns, countryCounts }) {
         </button>
       </div>
 
+      {/* Search and filter, like a city job map */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <form onSubmit={onSearch} className="flex min-w-[220px] flex-1 items-center gap-2 rounded-full border border-ink/15 bg-white px-3 py-1.5">
+          <span aria-hidden="true" className="text-ink2">⌕</span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search a country or startup"
+            aria-label="Search a country or startup"
+            className="w-full bg-transparent text-sm outline-none"
+            maxLength={80}
+          />
+        </form>
+        <select value={area} onChange={(e) => setArea(e.target.value)} aria-label="Filter by area"
+          className="rounded-full border border-ink/15 bg-white px-3 py-2 text-sm">
+          <option value="">All areas</option>
+          {INDUSTRIES.filter((i) => byArea[i]).map((i) => <option key={i} value={i}>{i}</option>)}
+        </select>
+        {area && (
+          <button onClick={() => setArea('')} className="text-xs font-semibold text-signal hover:underline">Clear</button>
+        )}
+      </div>
+
       <div className="mt-4 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <div className="card overflow-hidden p-2 sm:p-4">
           <div className="flex items-center justify-between px-2 pb-2">
@@ -119,8 +165,8 @@ export default function Atlas({ unicorns, countryCounts }) {
             </div>
           </div>
           <WorldMap
-            weights={weights}
-            maxWeight={maxWeight}
+            weights={areaWeights}
+            maxWeight={areaMax}
             continent={continent}
             country={country}
             center={center}
@@ -130,6 +176,7 @@ export default function Atlas({ unicorns, countryCounts }) {
           <div className="flex flex-wrap items-center gap-3 px-2 pt-2 text-xs text-ink2">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#E3DDCF]" /> No data yet
             <span className="inline-block h-2.5 w-8 rounded-sm bg-gradient-to-r from-[#C4BAA5] to-signal" /> More startups &amp; problems
+            {area ? ` in ${area}` : ''}
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PLANS, inr } from '@/lib/plus';
+import { PLANS, inr } from '@/lib/plans';
 
 // Thin launch-price strip above the menu, linking to the plans.
 export default function LaunchBanner() {

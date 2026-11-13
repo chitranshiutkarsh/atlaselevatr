@@ -16,7 +16,7 @@ Find work on the problems you care about. The world's problems, the startups sol
 - **Gap finder** (`/gaps`): problems ranked by unmet demand: (votes + 2 × stories + 4 × builders) ÷ (1 + startups already working on it in that country). Labels: open whitespace, gap in country, thin, crowded.
 - **Claims and Builders board** (`/builders`): "Want to build this?" can be made public. Public builders get a card (first name, city, stage, needs, headline; never contact details), post progress updates from the same browser, and others ask for an intro (handled by the team in `/admin` → Intro requests). Setting a lead to "in studio" shows a studio-pick badge.
 - **Share cards**: each problem has a generated image (`opengraph-image.js`) and WhatsApp / LinkedIn / X / copy buttons. Links carry the sharer's invite code.
-- **Plans and Atlas+** (`/plans`, `lib/plus.js`): launch-price banner, a free account opens every apply link (`/go/role/:id`), free users see their top 3 "For you" matches and Atlas+ shows them all. Requests show in Admin → Atlas+, where you activate 1 or 3 months.
+- **Plans and Atlas+** (`/plans`, `lib/plus.js`): launch-price banner, a free account opens every apply link (`/go/role/:id`), free users see their top 3 "For you" matches and Atlas+ shows them all. People pay ₹99 / ₹250 by UPI (QR in `public/pay`, details in `lib/plans.js`) and send the UPI reference; it shows in Admin → Atlas+, where you activate 1 or 3 months.
 - **Sign-in and weekly digest**: email magic links (no passwords) at `/signin`, a "My Atlas" page at `/me`, and a weekly email of top problems, new problems and gaps for a chosen country and industries, sent every Monday 9:00 IST by Vercel Cron (`vercel.json`). Needs `RESEND_API_KEY`, `EMAIL_FROM` and `CRON_SECRET`.
 - **v3 flow (one loop)**: Face it → Validate → Gap check → Raise → Claim → Studio.
   - **I face this** is the single action on a problem: it counts the person once (a vote) and then offers an optional one-line story (proof). The old separate vote and "This happens to me" buttons are merged (`components/FacePanel.jsx`).
@@ -55,8 +55,6 @@ Stack: Next.js 14 (App Router) · Postgres on Neon · Tailwind CSS · deployed o
    | `HASH_SECRET` | any long random text |
    | `NEXT_PUBLIC_SITE_URL` | `https://atlaselevatr.in` |
    | `RESEND_API_KEY` | from [resend.com](https://resend.com) → API Keys (for sign-in links and the digest) |
-   | `ATLAS_PLUS_MONTH_LINK` | optional: payment link (e.g. a Razorpay Payment Link) for Atlas+ ₹249/month; without it, requests wait in Admin → Atlas+ |
-   | `ATLAS_PLUS_QUARTER_LINK` | optional: payment link for Atlas+ ₹499 / 3 months |
    | `EMAIL_FROM` | e.g. `Atlas <hello@atlaselevatr.in>` (verify the domain in Resend first) |
    | `CRON_SECRET` | any long random text (protects the weekly digest job) |
 4. **Redeploy.** **Deployments → ⋯ on the latest → Redeploy.** Tables are created and the starter unicorn list is loaded automatically on the first visit.
