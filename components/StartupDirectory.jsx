@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DIRECTORY_PAGE_SIZE } from '@/lib/constants';
 import { prettyName } from '@/lib/geo';
+import InlineRoles from './InlineRoles';
 
 function buildQuery(filters, offset) {
   const params = new URLSearchParams();
@@ -22,6 +23,8 @@ export default function StartupDirectory({
   const [industry, setIndustry] = useState(initial.industry || null);
   const [city, setCity] = useState(initial.city || null);
   const [unicorn, setUnicorn] = useState(Boolean(initial.unicorn));
+  const [hiring, setHiring] = useState(Boolean(initial.hiring));
+  const [openRoles, setOpenRoles] = useState(null); // company id whose roles are shown
   const [query, setQuery] = useState(initial.q || '');
   const [q, setQ] = useState(initial.q || '');
   const [data, setData] = useState({ companies: [], total: 0, industries: [], cities: [] });
@@ -46,7 +49,7 @@ export default function StartupDirectory({
     return () => clearTimeout(t);
   }, [query]);
 
-  const filters = { country, continent, industry, city, q, unicorn };
+  const filters = { country, continent, industry, city, q, unicorn, hiring };
 
   useEffect(() => {
     const id = ++request.current;
@@ -66,11 +69,12 @@ export default function StartupDirectory({
       if (city) params.set('city', city);
       if (q) params.set('q', q);
       if (unicorn) params.set('unicorn', '1');
+      if (hiring) params.set('hiring', '1');
       const qs = params.toString();
       window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country, continent, industry, city, q, unicorn]);
+  }, [country, continent, industry, city, q, unicorn, hiring]);
 
   async function loadMore() {
     const id = request.current;
@@ -97,6 +101,13 @@ export default function StartupDirectory({
           className="input"
           aria-label="Search startups"
         />
+        <button
+          onClick={() => setHiring((h) => !h)}
+          className={`${hiring ? 'chip-on' : 'chip'} shrink-0 justify-center py-2`}
+          aria-pressed={hiring}
+        >
+          💼 Hiring now
+        </button>
         <button
           onClick={() => setUnicorn((u) => !u)}
           className={`${unicorn ? 'chip-on' : 'chip'} shrink-0 justify-center py-2`}
@@ -165,9 +176,19 @@ export default function StartupDirectory({
             </div>
             <p className="mt-1 line-clamp-3 text-sm text-ink2">{c.problem}</p>
             {c.open_roles > 0 && (
-              <a href={`/jobs?company=${c.id}`} className="mt-1.5 inline-block text-xs font-semibold text-moss hover:underline">
-                Hiring · {c.open_roles} open role{c.open_roles === 1 ? '' : 's'} →
-              </a>
+              <>
+                <button
+                  onClick={() => setOpenRoles(openRoles === c.id ? null : c.id)}
+                  aria-expanded={openRoles === c.id}
+                  className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-moss/10 px-2.5 py-1 text-xs font-semibold text-moss hover:bg-moss/20"
+                >
+                  💼 {c.open_roles} open role{c.open_roles === 1 ? '' : 's'} · {openRoles === c.id ? 'hide' : 'apply'}
+                  <span aria-hidden="true">{openRoles === c.id ? '▴' : '▾'}</span>
+                </button>
+                {openRoles === c.id && (
+                  <InlineRoles query={`company=${c.id}`} limit={8} moreHref={`/jobs?company=${c.id}`} />
+                )}
+              </>
             )}
             <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink2/80">
               {[c.city || (c.country !== 'India' ? prettyName(c.country) : null), c.sector, c.last_funded ? `funded ${c.last_funded}` : null]

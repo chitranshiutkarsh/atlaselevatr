@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { INDUSTRIES } from '@/lib/constants';
 import { INDIA_CITIES, INDIA_VIEW, indiaCity } from '@/lib/india-cities';
+import InlineRoles from './InlineRoles';
 import { CONTINENTS, CONTINENT_OF, WORLD_VIEW, prettyName, continentByName } from '@/lib/geo';
 import StartupDirectory from './StartupDirectory';
 import VoteButton from './VoteButton';
@@ -258,14 +259,21 @@ export default function Atlas({ unicorns, countryCounts, byArea = {}, indiaCitie
                       <p className="mt-1 font-mono text-xs text-paper/70">
                         {fmt(cityInfo.startups)} startups · {fmt(cityInfo.jobs)} open roles
                       </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <Link href={`/jobs?tab=all&country=India&city=${encodeURIComponent(city)}`} className="rounded-full bg-signal px-3 py-1.5 text-xs font-semibold text-white">
-                          Jobs in {city} →
-                        </Link>
-                        <a href="#city-startups" className="rounded-full border border-paper/30 px-3 py-1.5 text-xs font-semibold">
-                          Startups in {city} ↓
-                        </a>
-                      </div>
+                      {cityInfo.jobs > 0 && (
+                        <>
+                          <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-paper/60">Open roles in {city}</p>
+                          <InlineRoles
+                            query={`country=India&city=${encodeURIComponent(city)}`}
+                            limit={5}
+                            showCompany
+                            dark
+                            moreHref={`/jobs?tab=all&country=India&city=${encodeURIComponent(city)}`}
+                          />
+                        </>
+                      )}
+                      <a href="#city-startups" className="mt-3 inline-block rounded-full border border-paper/30 px-3 py-1.5 text-xs font-semibold">
+                        Startups in {city} ↓
+                      </a>
                     </div>
                   ) : (
                     <p className="label">Pick a city</p>
@@ -277,6 +285,18 @@ export default function Atlas({ unicorns, countryCounts, byArea = {}, indiaCitie
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {layer === 'country' && !inIndia && (
+                <div className="mt-4 rounded-xl border border-ink/10 bg-white p-3">
+                  <p className="label">Open roles in {prettyName(country)}</p>
+                  <InlineRoles
+                    query={`country=${encodeURIComponent(country)}`}
+                    limit={5}
+                    showCompany
+                    moreHref={`/jobs?tab=all&country=${encodeURIComponent(country)}`}
+                  />
                 </div>
               )}
 

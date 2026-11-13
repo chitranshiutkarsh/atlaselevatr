@@ -21,6 +21,7 @@ export async function GET(request) {
       city,
       q,
       unicorn: p.get('unicorn') === '1',
+      hiring: p.get('hiring') === '1',
       limit: p.get('limit') || DIRECTORY_PAGE_SIZE,
       offset: p.get('offset') || 0,
     });

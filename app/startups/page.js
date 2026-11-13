@@ -16,6 +16,7 @@ export default function StartupsPage({ searchParams }) {
     city: typeof searchParams.city === 'string' ? searchParams.city.slice(0, 60) : null,
     q: typeof searchParams.q === 'string' ? searchParams.q.slice(0, 80) : '',
     unicorn: searchParams.unicorn === '1',
+    hiring: searchParams.hiring === '1',
   };
   const scopeLabel = country ? prettyName(country) : continent || 'the world';
   const tabs = [
