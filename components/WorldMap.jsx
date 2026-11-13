@@ -115,7 +115,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                   const [x, y] = path.centroid(geo);
                   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
                   const label = fmt(w);
-                  const r = (6 + label.length * 2.2) / k;
+                  const r = (10 + label.length * 3.4) / k;
                   return (
                     <g
                       key={`b-${geo.rsmKey}`}
@@ -123,11 +123,11 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                       onClick={() => onPick(name, cont)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <circle r={r} fill="#FFFFFF" stroke="#14213D" strokeOpacity={0.25} strokeWidth={0.8 / k} />
+                      <circle r={r} fill="#FFFFFF" stroke="#14213D" strokeOpacity={0.25} strokeWidth={1 / k} />
                       <text
                         textAnchor="middle"
                         dy="0.35em"
-                        style={{ fontSize: 7 / k, fontWeight: 600, fill: '#14213D', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
+                        style={{ fontSize: 12 / k, fontWeight: 700, fill: '#14213D', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
                       >
                         {label}
                       </text>
