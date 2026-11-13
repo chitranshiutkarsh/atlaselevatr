@@ -16,7 +16,7 @@ export function ago(iso) {
 
 function where(role) {
   if (role.remote && (!role.location || /remote/i.test(role.location))) return 'Remote';
-  const loc = role.location || (role.country ? prettyName(role.country) : null);
+  const loc = (role.location || '').replace(/(,\s*)+,/g, ',') || (role.country ? prettyName(role.country) : null);
   return [loc, role.remote ? 'Remote OK' : null].filter(Boolean).join(' · ') || 'Location not listed';
 }
 

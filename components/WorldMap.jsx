@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
 import { CONTINENT_OF } from '@/lib/geo';
 
@@ -31,9 +31,9 @@ const fmt = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : S
 // Scale up / scale down like a city map: + and − buttons, drag to move,
 // pinch or ctrl/⌘ + scroll to zoom. Count bubbles show where the activity is.
 // Cities close together on screen merge into one bubble; zooming in splits them.
-function clusterCities(cities, projection, k) {
+function clusterCities(cities, projection, k, s = 1) {
   const out = [];
-  const gap = 30; // map units on screen
+  const gap = 30 * s; // map units on screen
   for (const c of [...cities].sort((a, b) => b.value - a.value)) {
     const p = projection(c.coords);
     if (!p) continue;
@@ -50,6 +50,19 @@ function clusterCities(cities, projection, k) {
 
 function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick, cities = null, city = null, onPickCity }) {
   const [pos, setPos] = useState({ coordinates: center, zoom });
+  // On small screens the 800-unit map shrinks, so bubbles and labels grow to stay readable.
+  const box = useRef(null);
+  const [ui, setUi] = useState(1);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([e]) => {
+      const w = e.contentRect.width || 800;
+      setUi(Math.min(2.2, Math.max(1, 560 / w)));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   // A new layer (world → continent → country) re-centres the map.
   useEffect(() => {
     setPos({ coordinates: center, zoom });
@@ -64,7 +77,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
   const bubbleMin = maxWeight * (k >= 4 ? 0 : k >= 2 ? 0.002 : 0.01);
 
   return (
-    <div className="relative">
+    <div ref={box} className="relative">
       <ComposableMap
         projection="geoEqualEarth"
         projectionConfig={{ scale: 165 }}
@@ -134,7 +147,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                   const [x, y] = path.centroid(geo);
                   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
                   const label = fmt(w);
-                  const r = (10 + label.length * 3.4) / k;
+                  const r = ((10 + label.length * 3.4) * ui) / k;
                   return (
                     <g
                       key={`b-${geo.rsmKey}`}
@@ -146,7 +159,7 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                       <text
                         textAnchor="middle"
                         dy="0.35em"
-                        style={{ fontSize: 12 / k, fontWeight: 700, fill: '#14213D', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
+                        style={{ fontSize: (12 * ui) / k, fontWeight: 700, fill: '#14213D', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
                       >
                         {label}
                       </text>
@@ -155,14 +168,14 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                 })}
                 {cities &&
                   (() => {
-                    const groups = clusterCities(cities, projection, k);
+                    const groups = clusterCities(cities, projection, k, ui);
                     // Name the biggest dozen; the rest show on hover or when zoomed in.
-                    const named = new Set(groups.slice().sort((a, b) => b.value - a.value).slice(0, k >= 10 ? 40 : 12));
+                    const named = new Set(groups.slice().sort((a, b) => b.value - a.value).slice(0, k >= 10 ? 40 : ui > 1.4 ? 6 : 12));
                     return groups.map((g) => {
                     const label = fmt(g.value);
                     const many = g.members.length > 1;
                     const on = !many && g.members[0] === city;
-                    const r = (11 + label.length * 3.4) / k;
+                    const r = ((11 + label.length * 3.4) * ui) / k;
                     return (
                       <g
                         key={`c-${g.members.join('|')}`}
@@ -179,15 +192,15 @@ function WorldMap({ weights, maxWeight, continent, country, center, zoom, onPick
                         <text
                           textAnchor="middle"
                           dy="0.35em"
-                          style={{ fontSize: 11 / k, fontWeight: 700, fill: '#FFFFFF', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
+                          style={{ fontSize: (11 * ui) / k, fontWeight: 700, fill: '#FFFFFF', fontFamily: 'var(--font-mono), monospace', pointerEvents: 'none' }}
                         >
                           {label}
                         </text>
                         {named.has(g) && (
                           <text
                             textAnchor="middle"
-                            y={r + 10 / k}
-                            style={{ fontSize: 10.5 / k, fontWeight: 600, fill: '#14213D', paintOrder: 'stroke', stroke: '#F4F1EA', strokeWidth: 3 / k, pointerEvents: 'none' }}
+                            y={r + (10 * ui) / k}
+                            style={{ fontSize: (10.5 * ui) / k, fontWeight: 600, fill: '#14213D', paintOrder: 'stroke', stroke: '#F4F1EA', strokeWidth: (3 * ui) / k, pointerEvents: 'none' }}
                           >
                             {many ? `${g.members[0]} +${g.members.length - 1}` : g.members[0]}
                           </text>

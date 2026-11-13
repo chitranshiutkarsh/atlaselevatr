@@ -42,7 +42,7 @@ export default function InlineRoles({ query, limit = 8, showCompany = false, dar
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold" title={r.title}>{r.title}</p>
               <p className={`truncate text-[11px] ${muted}`}>
-                {[showCompany ? r.company : null, r.remote ? 'Remote' : r.location, ago(r.posted_at)].filter(Boolean).join(' · ')}
+                {[showCompany ? r.company : null, r.remote ? 'Remote' : (r.location || '').replace(/(,\s*)+,/g, ','), ago(r.posted_at)].filter(Boolean).join(' · ')}
               </p>
             </div>
             <a
